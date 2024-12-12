@@ -1,11 +1,22 @@
-import styled from "styled-components";
-import { useNavigate } from "react-router-dom";
-import Loading from "../components/generic/Loading";
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import styled from 'styled-components';
+import Loading from '../components/generic/Loading';
+
+const PageLayout = styled.div`
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+`;
+
+const Header = styled.div`
+  background-color: #2c3e50;
+  color: black;
+`;
 
 const TimersContainer = styled.div`
-  background-color: #f0f0f0;
-  min-height: 100vh;
+  background-color: white;
+  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -17,6 +28,7 @@ const Title = styled.h1`
   text-align: center;
   font-size: 2.5rem;
   margin-bottom: 2rem;
+  color: white;
 `;
 
 const ButtonContainer = styled.div`
@@ -25,7 +37,6 @@ const ButtonContainer = styled.div`
   gap: 1rem;
 `;
 
-// const TimerButton = styled(Link)`
 const TimerButton = styled.button`
   padding: 1rem 2rem;
   font-size: 1.5rem;
@@ -43,35 +54,36 @@ const TimerButton = styled.button`
 `;
 
 const TimersView = () => {
+    const [loading, setLoading] = useState(false);
+    const navigate = useNavigate();
 
-  const [loading, setLoading] = useState(false)
-  const navigate = useNavigate();
+    const handleClick = (path: string) => {
+        setLoading(true);
+        setTimeout(() => {
+            navigate(path);
+            setLoading(false);
+        }, 1000);
+    };
 
-  const handleClick = (path: string) => {
-    setLoading(true);
-    setTimeout(() => {
-      navigate(path);
-      setLoading(false);
-    }, 1000);
-  };
-
-  return (
-    <TimersContainer>
-      {loading ? ( 
-        <Loading size="large" color="#4acf50" />
-      ) : (
-        <>
-          <Title>Select a Timer</Title>
-          <ButtonContainer>
-            <TimerButton onClick={() => handleClick("/stopwatch")}>Stopwatch</TimerButton>
-            <TimerButton onClick={() => handleClick("/countdown")}>Countdown</TimerButton>
-            <TimerButton onClick={() => handleClick("/xy")}>XY Timer</TimerButton>
-            <TimerButton onClick={() => handleClick("/tabata")}>Tabata</TimerButton>
-          </ButtonContainer>
-        </>
-      )}
-    </TimersContainer>
-  );
+    return (
+        <PageLayout>
+            <Header>
+                <Title>Select a Timer</Title>
+            </Header>
+            <TimersContainer>
+                {loading ? (
+                    <Loading size="large" color="#4acf50" />
+                ) : (
+                    <ButtonContainer>
+                        <TimerButton onClick={() => handleClick('/stopwatch')}>Stopwatch</TimerButton>
+                        <TimerButton onClick={() => handleClick('/countdown')}>Countdown</TimerButton>
+                        <TimerButton onClick={() => handleClick('/xy')}>XY Timer</TimerButton>
+                        <TimerButton onClick={() => handleClick('/tabata')}>Tabata</TimerButton>
+                    </ButtonContainer>
+                )}
+            </TimersContainer>
+        </PageLayout>
+    );
 };
 
 export default TimersView;

@@ -1,8 +1,9 @@
-import styled from "styled-components";
+import styled from 'styled-components';
 
 const Wrapper = styled.div`
   border: 1px solid #121212;
   margin: 20px 0px;
+  color: black;
 `;
 
 const Container = styled.div`
@@ -27,51 +28,51 @@ const RenderComponent = styled.div`
 const Documentation = styled.table``;
 
 const DocumentComponent = ({
-  title,
-  component,
-  propDocs,
+    title,
+    component,
+    propDocs,
 }: {
-  title: string;
-  component: React.ReactNode;
-  propDocs: {
-    prop: string;
-    description: string;
-    type: string;
-    defaultValue: string;
-  }[];
+    title: string;
+    component: React.ReactNode;
+    propDocs: {
+        prop: string;
+        description: string;
+        type: string;
+        defaultValue: string;
+    }[];
 }) => {
-  return (
-    <Wrapper>
-      <Title>{title}</Title>
-      <Container>
-        <RenderComponent>{component}</RenderComponent>
-        <Documentation>
-          <thead>
-            <tr>
-              <th>Prop</th>
-              <th>Description</th>
-              <th>Type</th>
-              <th>Default value</th>
-            </tr>
-          </thead>
-          <tbody>
-            {propDocs.map((doc) => {
-              return (
-                <tr key={doc.description}>
-                  <td>{doc.prop}</td>
-                  <td>{doc.description}</td>
-                  <td>{doc.type}</td>
-                  <td>
-                    <code>{doc.defaultValue}</code>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </Documentation>
-      </Container>
-    </Wrapper>
-  );
+    return (
+        <Wrapper>
+            <Title>{title}</Title>
+            <Container>
+                <RenderComponent>{component}</RenderComponent>
+                <Documentation>
+                    <thead>
+                        <tr>
+                            <th>Prop</th>
+                            <th>Description</th>
+                            <th>Type</th>
+                            <th>Default value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {propDocs.map(doc => {
+                            return (
+                                <tr key={doc.description}>
+                                    <td>{doc.prop}</td>
+                                    <td>{doc.description}</td>
+                                    <td>{doc.type}</td>
+                                    <td>
+                                        <code>{doc.defaultValue}</code>
+                                    </td>
+                                </tr>
+                            );
+                        })}
+                    </tbody>
+                </Documentation>
+            </Container>
+        </Wrapper>
+    );
 };
 
 export default DocumentComponent;

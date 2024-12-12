@@ -10,6 +10,8 @@ const Container = styled.div`
   padding: 20px;
   max-width: 800px;
   margin: 0 auto;
+  background-color: white;
+  color: #2c3e50;
 `;
 
 const TimerQueue = styled.div`
@@ -17,6 +19,7 @@ const TimerQueue = styled.div`
   padding: 20px;
   background-color: #f5f5f5;
   border-radius: 8px;
+  color: #2c3e50;
 `;
 
 const TotalTimeDisplay = styled.div`

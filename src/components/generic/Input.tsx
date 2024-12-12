@@ -1,5 +1,5 @@
-import { useState } from "react";
-import styled from "styled-components";
+import { useState } from 'react';
+import styled from 'styled-components';
 
 const Button = styled.button`
   background-color: #4caf50;
@@ -19,6 +19,7 @@ const InputContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
+  color: #2c3e50;
 `;
 
 const Dropdown = styled.select`
@@ -27,46 +28,60 @@ const Dropdown = styled.select`
   font-size: 1.2rem;
   border-radius: 4px;
   border: 1px solid #ccc;
+  background-color: white;
+  color: #2c3e50;
+  cursor: pointer;
+
+  &:focus {
+    outline: none;
+    border-color: #4caf50;
+  }
+
+  option {
+    background-color: white;
+    color: #2c3e50;
+  }
 `;
 
-const Input = ({ onChange, label }: { onChange: (hours: number, minutes: number, seconds: number) => void, label: string }) => {
-  const [hours, setHours] = useState(0);
-  const [minutes, setMinutes] = useState(0);
-  const [seconds, setSeconds] = useState(0);
+const Input = ({ onChange, label }: { onChange: (hours: number, minutes: number, seconds: number) => void; label: string }) => {
+    const [hours, setHours] = useState(0);
+    const [minutes, setMinutes] = useState(0);
+    const [seconds, setSeconds] = useState(0);
 
-  const handleSetTime = () => {
-    onChange(hours, minutes, seconds);
-  };
+    const handleSetTime = () => {
+        onChange(hours, minutes, seconds);
+    };
 
-  return (
-    <InputContainer>
-      <label>{label}</label>
-      <div>
-        <Dropdown value={hours} onChange={(e) => setHours(Number(e.target.value))}>
-          {Array.from({ length: 24 }, (_, i) => (
-            <option key={i} value={i}>
-              {i} hrs
-            </option>
-          ))}
-        </Dropdown>
-        <Dropdown value={minutes} onChange={(e) => setMinutes(Number(e.target.value))}>
-          {Array.from({ length: 60 }, (_, i) => (
-            <option key={i} value={i}>
-              {i} min
-            </option>
-          ))}
-        </Dropdown>
-        <Dropdown value={seconds} onChange={(e) => setSeconds(Number(e.target.value))}>
-          {Array.from({ length: 60 }, (_, i) => (
-            <option key={i} value={i}>
-              {i} sec
-            </option>
-          ))}
-        </Dropdown>
-      </div>
-      <Button onClick={handleSetTime}>Set Time</Button>
-    </InputContainer>
-  );
+    return (
+        <InputContainer>
+            {/* biome-ignore lint/a11y/noLabelWithoutControl: <explanation> */}
+            <label>{label}</label>
+            <div>
+                <Dropdown value={hours} onChange={e => setHours(Number(e.target.value))}>
+                    {Array.from({ length: 24 }, (_, i) => (
+                        <option key={i} value={i}>
+                            {i} hrs
+                        </option>
+                    ))}
+                </Dropdown>
+                <Dropdown value={minutes} onChange={e => setMinutes(Number(e.target.value))}>
+                    {Array.from({ length: 60 }, (_, i) => (
+                        <option key={i} value={i}>
+                            {i} min
+                        </option>
+                    ))}
+                </Dropdown>
+                <Dropdown value={seconds} onChange={e => setSeconds(Number(e.target.value))}>
+                    {Array.from({ length: 60 }, (_, i) => (
+                        <option key={i} value={i}>
+                            {i} sec
+                        </option>
+                    ))}
+                </Dropdown>
+            </div>
+            <Button onClick={handleSetTime}>Set Time</Button>
+        </InputContainer>
+    );
 };
 
 export default Input;

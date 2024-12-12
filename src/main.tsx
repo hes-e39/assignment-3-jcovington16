@@ -1,19 +1,13 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { RouterProvider, createHashRouter } from 'react-router-dom';
-
-import App from './App';
 import './index.css';
-
-const router = createHashRouter([
-    {
-        path: '/',
-        element: <App />,
-    },
-]);
+import App from './App';
+import { TimerProvider } from './components/contex/TimerContext';
 
 createRoot(document.getElementById('root')!).render(
     <StrictMode>
-        <RouterProvider router={router} />
+        <TimerProvider>
+            <App />
+        </TimerProvider>
     </StrictMode>,
 );
