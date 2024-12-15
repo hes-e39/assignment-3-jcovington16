@@ -1,11 +1,11 @@
-import { useState, useEffect } from "react";
-import HomeButton from "../generic/HomeButton";
-import Panel from "../generic/Panel";
-import Input from "../generic/Input";
-import Button from "../generic/StartButton";
-import ResetButton from "../generic/ResetButton";
-import styled from "styled-components";
-import { formatTime, toggleTimerActiveState } from "../../utils/helpers";
+import { useEffect, useState } from 'react';
+import styled from 'styled-components';
+import { formatTime, toggleTimerActiveState } from '../../utils/helpers';
+import HomeButton from '../generic/HomeButton';
+import Input from '../generic/Input';
+import Panel from '../generic/Panel';
+import ResetButton from '../generic/ResetButton';
+import Button from '../generic/StartButton';
 
 const TimeDisplay = styled.div`
   font-size: 3rem;
@@ -20,31 +20,29 @@ const SetNewTimeButton = styled(Button)`
 `;
 
 interface CountdownProps {
-  initialTime?: number;
-  onComplete?: () => void;
+    initialTime?: number;
+    onComplete?: () => void;
 }
 
 const Countdown: React.FC<CountdownProps> = ({ initialTime, onComplete }) => {
-
     const [time, setTime] = useState(initialTime || 0);
     const [remainingTime, setRemainingTime] = useState(initialTime || 0);
     const [isTimeSet, setIsTimeSet] = useState(!!initialTime);
     const [isActive, setIsActive] = useState(false);
 
     useEffect(() => {
-      if (initialTime && initialTime > 0) {
-          console.log('Setting time to:', initialTime);
-          setTime(initialTime);
-          setRemainingTime(initialTime);
-          setIsTimeSet(true);
-      }
-  }, [initialTime]);
+        if (initialTime && initialTime > 0) {
+            setTime(initialTime);
+            setRemainingTime(initialTime);
+            setIsTimeSet(true);
+        }
+    }, [initialTime]);
 
     useEffect(() => {
         let interval: NodeJS.Timeout | undefined;
         if (isActive && remainingTime > 0) {
             interval = setInterval(() => {
-                setRemainingTime((prev) => {
+                setRemainingTime(prev => {
                     const newTime = prev - 1;
                     if (newTime <= 0 && onComplete) {
                         setIsActive(false);
@@ -84,14 +82,14 @@ const Countdown: React.FC<CountdownProps> = ({ initialTime, onComplete }) => {
         setRemainingTime(totalSeconds);
         setIsTimeSet(true);
     };
-    
+
     return (
         <Panel title="Countdown Timer">
             {!initialTime && <HomeButton />}
             {isTimeSet ? (
                 <>
                     <TimeDisplay>{formatTime(remainingTime)}</TimeDisplay>
-                    <Button onClick={handleStart}>{isActive ? "Pause" : "Start"}</Button>
+                    <Button onClick={handleStart}>{isActive ? 'Pause' : 'Start'}</Button>
                     <ResetButton onClick={handleResetTime}>Reset</ResetButton>
                     {!initialTime && <SetNewTimeButton onClick={handleSetNewTime}>New Time</SetNewTimeButton>}
                 </>

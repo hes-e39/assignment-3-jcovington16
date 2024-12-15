@@ -1,450 +1,101 @@
-// import { useContext, useState } from 'react';
-// import styled from 'styled-components';
-// import TimerContext from '../components/contex/TimerContext';
-// import Countdown from '../components/timers/Countdown';
-// import Stopwatch from '../components/timers/Stopwatch';
-// import Tabata from '../components/timers/Tabata';
-// import XY from '../components/timers/XY';
-// import WorkoutShareControls from '../utils/WorkoutShare';
-// import {
-//     formatTotalTime,
-//     workoutControls,
-//     addTimer,
-//     Timer
-// } from '../utils/helpers';
-
-// const Container = styled.div`
-//   padding: 20px;
-//   max-width: 800px;
-//   margin: 0 auto;
-//   color: black;
-//   background-color: white;
-// `;
-
-// const TimerQueue = styled.div`
-//   margin-top: 20px;
-//   padding: 20px;
-//   background-color: #f5f5f5;
-//   border-radius: 8px;
-// `;
-
-// const TotalTimeDisplay = styled.div`
-//   margin: 10px 0;
-//   padding: 10px;
-//   background-color: #e8f5e9;
-//   border-radius: 4px;
-//   font-size: 1.1rem;
-//   color: #2e7d32;
-//   display: flex;
-//   align-items: center;
-//   gap: 8px;
-
-//   span {
-//     font-weight: bold;
-//   }
-// `;
-
-// interface QueueItemProps {
-//     $isActive: boolean;
-// }
-
-// const QueueItem = styled.div<QueueItemProps>`
-//   padding: 15px;
-//   margin: 10px 0;
-//   background-color: ${props => (props.$isActive ? '#e0f7fa' : 'white')};
-//   border: 1px solid #ddd;
-//   border-radius: 4px;
-//   display: flex;
-//   justify-content: space-between;
-//   align-items: center;
-// `;
-
-// const ControlButton = styled.button`
-//   padding: 8px 16px;
-//   margin: 0 5px;
-//   border: none;
-//   border-radius: 4px;
-//   cursor: pointer;
-//   font-weight: bold;
-
-//   &.start {
-//     background-color: #4caf50;
-//     color: white;
-//   }
-
-//   &.reset {
-//     background-color: #ff9800;
-//     color: white;
-//   }
-
-//   &.forward {
-//     background-color: #2196f3;
-//     color: white;
-//   }
-
-//   &:hover {
-//     opacity: 0.9;
-//   }
-// `;
-
-// const ConfigSection = styled.div`
-//   margin: 20px 0;
-//   display: flex;
-//   flex-direction: column;
-//   gap: 10px;
-// `;
-
-// const InputGroup = styled.div`
-//   display: flex;
-//   gap: 10px;
-//   align-items: center;
-//   margin-bottom: 10px;
-
-//   label {
-//     display: flex;
-//     gap: 8px;
-//     align-items: center;
-//     background-color: white;
-//   }
-
-//   input, select {
-//     padding: 5px;
-//     border: 1px solid #ddd;
-//     border-radius: 4px;
-//     color: white;
-//   }
-// `;
-
-// const AddButton = styled.button`
-//   padding: 10px 20px;
-//   background-color: #4caf50;
-//   color: white;
-//   border: none;
-//   border-radius: 4px;
-//   cursor: pointer;
-//   font-weight: bold;
-//   margin-top: 10px;
-
-//   &:hover {
-//     background-color: #45a049;
-//   }
-// `;
-
-// interface CountdownProps {
-//     initialTime: number;
-//     onComplete?: () => void;
-// }
-
-// interface StopwatchProps {
-//     onComplete?: () => void;
-// }
-
-// interface XYProps {
-//     rounds?: number;
-//     timePerRound?: number;
-//     onComplete?: () => void;
-// }
-
-// interface TabataProps {
-//     rounds?: number;
-//     workTime?: number;
-//     restTime?: number;
-//     onComplete?: () => void;
-// }
-
-// const AddTimerHomeView: React.FC = () => {
-//     const { state, dispatch } = useContext(TimerContext);
-//     const [type, setType] = useState<string>('stopwatch');
-//     const [duration, setDuration] = useState<number>(30);
-//     const [workTime, setWorkTime] = useState<number>(20);
-//     const [restTime, setRestTime] = useState<number>(10);
-//     const [rounds, setRounds] = useState<number>(8);
-//     const [activeTimerIndex, setActiveTimerIndex] = useState<number | null>(null);
-//     const [isWorkoutRunning, setIsWorkoutRunning] = useState(false);
-
-//     const handleAddTimer = () => {
-//         addTimer({
-//             type,
-//             duration,
-//             rounds,
-//             workTime,
-//             restTime
-//         }, dispatch);
-//     };
-
-//     const workoutControlProps = {
-//         activeTimerIndex,
-//         isWorkoutRunning,
-//         timers: state.timers,
-//         dispatch,
-//         setActiveTimerIndex,
-//         setIsWorkoutRunning
-//     };
-
-//     const startWorkout = () => {
-//         if (!isWorkoutRunning && state.timers.length > 0) {
-//             setActiveTimerIndex(0);
-//             setIsWorkoutRunning(true);
-//             dispatch({ type: 'START_TIMER', payload: 0 });
-//         } else {
-//             setIsWorkoutRunning(false);
-//         }
-//         dispatch({ type: 'PAUSE_RESUME_WORKOUT' });
-//     };
-
-//     const resetWorkout = () => {
-//         setActiveTimerIndex(null);
-//         setIsWorkoutRunning(false);
-//         dispatch({ type: 'RESET_WORKOUT' });
-//     };
-
-//     const fastForward = () => {
-//         if (activeTimerIndex !== null) {
-//             const nextIndex = activeTimerIndex + 1;
-//             if (nextIndex < state.timers.length) {
-//                 setActiveTimerIndex(nextIndex);
-//                 dispatch({ type: 'FAST_FORWARD' });
-//             } else {
-//                 setActiveTimerIndex(null);
-//                 setIsWorkoutRunning(false);
-//             }
-//         }
-//     };
-
-//     const removeTimer = (index: number) => {
-//         dispatch({ type: 'REMOVE_TIMER', payload: index });
-//         if (index === activeTimerIndex) {
-//             setActiveTimerIndex(null);
-//             setIsWorkoutRunning(false);
-//         }
-//     };
-
-//     const renderActiveTimer = () => {
-//         if (activeTimerIndex === null || !state.timers[activeTimerIndex]) return null;
-
-//         const timer = state.timers[activeTimerIndex];
-
-//         switch (timer.type) {
-//             case 'countdown': {
-//                 const CountdownTimer = Countdown as React.FC<CountdownProps>;
-//                 return (
-//                     <div>
-//                         <CountdownTimer
-//                             key={timer.id}
-//                             initialTime={Number(timer.duration)}
-//                             onComplete={() => {
-//                                 if (activeTimerIndex < state.timers.length - 1) {
-//                                     fastForward();
-//                                 }
-//                             }}
-//                         />
-//                     </div>
-//                 );
-//             }
-
-//             case 'stopwatch': {
-//                 const StopwatchTimer = Stopwatch as React.FC<StopwatchProps>;
-//                 return (
-//                     <StopwatchTimer
-//                         key={timer.id}
-//                         onComplete={() => {
-//                             if (activeTimerIndex < state.timers.length - 1) {
-//                                 fastForward();
-//                             }
-//                         }}
-//                     />
-//                 );
-//             }
-
-//             case 'xy': {
-//                 const XYTimer = XY as React.FC<XYProps>;
-//                 return (
-//                     <XYTimer
-//                         key={timer.id}
-//                         rounds={timer.config?.rounds}
-//                         timePerRound={timer.config?.timePerRound}
-//                         onComplete={() => {
-//                             if (activeTimerIndex < state.timers.length - 1) {
-//                                 fastForward();
-//                             }
-//                         }}
-//                     />
-//                 );
-//             }
-
-//             case 'tabata': {
-//                 const TabataTimer = Tabata as React.FC<TabataProps>;
-//                 return (
-//                     <TabataTimer
-//                         key={timer.id}
-//                         rounds={timer.config?.rounds}
-//                         workTime={timer.config?.workTime}
-//                         restTime={timer.config?.restTime}
-//                         onComplete={() => {
-//                             if (activeTimerIndex < state.timers.length - 1) {
-//                                 fastForward();
-//                             }
-//                         }}
-//                     />
-//                 );
-//             }
-
-//             default:
-//                 return null;
-//         }
-//     };
-
-//     return (
-//         <Container>
-//             <h1>Add a Timer</h1>
-
-//             <WorkoutShareControls />
-
-//             <ConfigSection>
-//                 <InputGroup>
-//                     <label>
-//                         Timer Type:
-//                         <select value={type} onChange={e => setType(e.target.value)}>
-//                             <option value="stopwatch">Stopwatch</option>
-//                             <option value="countdown">Countdown</option>
-//                             <option value="xy">XY Timer</option>
-//                             <option value="tabata">Tabata</option>
-//                         </select>
-//                     </label>
-//                 </InputGroup>
-
-//                 {type === 'countdown' && (
-//                     <InputGroup>
-//                         <label>
-//                             Duration (seconds):
-//                             <input type="number" value={duration} onChange={e => setDuration(Number(e.target.value))} min={1} />
-//                         </label>
-//                     </InputGroup>
-//                 )}
-
-//                 {type === 'xy' && (
-//                     <InputGroup>
-//                         <label>
-//                             Round Duration (seconds):
-//                             <input type="number" value={duration} onChange={e => setDuration(Number(e.target.value))} min={1} />
-//                         </label>
-//                         <label>
-//                             Number of Rounds:
-//                             <input type="number" value={rounds} onChange={e => setRounds(Number(e.target.value))} min={1} />
-//                         </label>
-//                     </InputGroup>
-//                 )}
-
-//                 {type === 'tabata' && (
-//                     <>
-//                         <InputGroup>
-//                             <label>
-//                                 Work Time (seconds):
-//                                 <input type="number" value={workTime} onChange={e => setWorkTime(Number(e.target.value))} min={1} />
-//                             </label>
-//                             <label>
-//                                 Rest Time (seconds):
-//                                 <input type="number" value={restTime} onChange={e => setRestTime(Number(e.target.value))} min={1} />
-//                             </label>
-//                         </InputGroup>
-//                         <InputGroup>
-//                             <label>
-//                                 Rounds:
-//                                 <input type="number" value={rounds} onChange={e => setRounds(Number(e.target.value))} min={1} />
-//                             </label>
-//                         </InputGroup>
-//                     </>
-//                 )}
-
-//                 <AddButton onClick={handleAddTimer}>Add Timer</AddButton>
-//             </ConfigSection>
-
-//             <TimerQueue>
-//                 <h2>Workout Queue ({state.timers.length} timers)</h2>
-//                 <TotalTimeDisplay>
-//                     Total Workout Time: <span>{formatTotalTime(state.totalTime)}</span>
-//                 </TotalTimeDisplay>
-//                 <div>
-//                     <ControlButton className="start" onClick={startWorkout}>
-//                         {isWorkoutRunning ? 'Pause' : 'Start Workout'}
-//                     </ControlButton>
-//                     <ControlButton className="reset" onClick={resetWorkout}>
-//                         Reset
-//                     </ControlButton>
-//                     <ControlButton className="forward" onClick={fastForward}>
-//                         Skip Timer
-//                     </ControlButton>
-//                 </div>
-
-//                 {state.timers.map((timer, index) => (
-//                     <QueueItem key={timer.id} $isActive={index === activeTimerIndex}>
-//                         <div>
-//                             {timer.type} - {formatTotalTime(timer.duration)}
-//                             {timer.config && ` - ${timer.config.rounds} rounds`}
-//                         </div>
-//                         <button onClick={() => removeTimer(index)}>Remove</button>
-//                     </QueueItem>
-//                 ))}
-
-//                 {activeTimerIndex !== null && renderActiveTimer()}
-//             </TimerQueue>
-//         </Container>
-//     );
-// };
-
-// export default AddTimerHomeView;
-
 import { useContext, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
 import TimerQueue from '../components/TimerQueue';
 import TimerContext from '../components/contex/TimerContext';
-import { AddButton, ConfigSection, Container, ControlButton, InputGroup, TotalTimeDisplay } from '../components/generic/AddTimerHomeViewStyles';
+import { ActiveTimerContainer, AddButton, ConfigSection, Container, DescriptionInput, InputGroup, TotalTimeDisplay, WorkoutControls } from '../components/generic/AddTimerHomeViewStyles';
 import Countdown from '../components/timers/Countdown';
 import Stopwatch from '../components/timers/Stopwatch';
 import Tabata from '../components/timers/Tabata';
 import XY from '../components/timers/XY';
 import WorkoutShareControls from '../utils/WorkoutShare';
-import { type Timer, addTimer, formatTotalTime, workoutControls } from '../utils/helpers';
-
-interface TimerProps {
-    onComplete?: () => void;
-    initialTime?: number;
-    rounds?: number;
-    timePerRound?: number;
-    workTime?: number;
-    restTime?: number;
-}
+// biome-ignore lint/style/useImportType: <explanation>
+import { Timer, formatTotalTime } from '../utils/helpers';
 
 const AddTimerHomeView: React.FC = () => {
     const { state, dispatch } = useContext(TimerContext);
-    const [searchParams, setSearchParams] = useSearchParams();
-    const [type, setType] = useState<string>('stopwatch');
+    const [type, setType] = useState<'stopwatch' | 'countdown' | 'xy' | 'tabata'>('stopwatch');
     const [duration, setDuration] = useState<number>(30);
-    const [workTime, setWorkTime] = useState<number>(20);
-    const [restTime, setRestTime] = useState<number>(10);
+    const [workTime] = useState<number>(20);
+    const [restTime] = useState<number>(10);
     const [rounds, setRounds] = useState<number>(8);
-    const [activeTimerIndex, setActiveTimerIndex] = useState<number | null>(null);
-    const [isWorkoutRunning, setIsWorkoutRunning] = useState(false);
+    const [hours, setHours] = useState(0);
+    const [minutes, setMinutes] = useState(0);
+    const [seconds, setSeconds] = useState(30);
+    const [workHours, setWorkHours] = useState(0);
+    const [workMinutes, setWorkMinutes] = useState(0);
+    const [workSeconds, setWorkSeconds] = useState(20);
+    const [restHours, setRestHours] = useState(0);
+    const [restMinutes, setRestMinutes] = useState(0);
+    const [restSeconds, setRestSeconds] = useState(10);
+    const [description, setDescription] = useState('');
 
-    const updateUrl = (timers: Timer[]) => {
-        const encodedTimers = btoa(JSON.stringify(timers));
-        setSearchParams({ workout: encodedTimers });
-    };
+    const activeTimerIndex = state.activeTimerIndex;
+    const isWorkoutRunning = state.isRunning;
 
     const handleAddTimer = () => {
-        addTimer(
-            {
-                type,
-                duration,
-                rounds,
-                workTime,
-                restTime,
-            },
-            dispatch,
-        );
+        let newTimer: Timer;
+
+        switch (type) {
+            case 'countdown':
+                newTimer = {
+                    id: Date.now(),
+                    type: 'countdown',
+                    duration: Number(duration),
+                    state: 'not running',
+                    description: description || 'No Description',
+                };
+                break;
+
+            case 'stopwatch':
+                newTimer = {
+                    id: Date.now(),
+                    type: 'stopwatch',
+                    duration: 0, // Stopwatch starts at 0 and counts up
+                    state: 'not running',
+                    description: description || 'No description',
+                };
+                break;
+
+            case 'xy':
+                newTimer = {
+                    id: Date.now(),
+                    type: 'xy',
+                    duration: duration * rounds,
+                    state: 'not running',
+                    description: description || '',
+                    config: {
+                        rounds,
+                        timePerRound: duration,
+                    },
+                };
+                break;
+
+            case 'tabata':
+                newTimer = {
+                    id: Date.now(),
+                    type: 'tabata',
+                    duration: rounds * (workTime + restTime),
+                    state: 'not running',
+                    description: description,
+                    config: {
+                        rounds,
+                        workTime,
+                        restTime,
+                    },
+                };
+                break;
+
+            default:
+                return;
+        }
+
+        dispatch({ type: 'ADD_TIMER', payload: newTimer });
     };
 
-    const handleTimersReorder = (newTimers: Timer[], newActiveIndex: number | null): void => {
+    const handleRemoveTimer = (index: number) => {
+        dispatch({ type: 'REMOVE_TIMER', payload: index });
+    };
+
+    const handleTimersReorder = (newTimers: Timer[], newActiveIndex: number | null) => {
         dispatch({
             type: 'REORDER_TIMERS',
             payload: {
@@ -454,62 +105,63 @@ const AddTimerHomeView: React.FC = () => {
         });
     };
 
-    const handleRemoveTimer = (index: number): void => {
-        if (activeTimerIndex !== null) {
-            workoutControls.removeTimer({
-                index,
-                activeTimerIndex,
-                isWorkoutRunning,
-                timers: state.timers,
-                dispatch,
-                setActiveTimerIndex,
-                setIsWorkoutRunning,
-            });
-        } else {
-            workoutControls.removeTimer({
-                index,
-                activeTimerIndex: -1,
-                isWorkoutRunning,
-                timers: state.timers,
-                dispatch,
-                setActiveTimerIndex,
-                setIsWorkoutRunning,
-            });
+    const startWorkout = () => {
+        if (!isWorkoutRunning && state.timers.length > 0) {
+            dispatch({ type: 'START_TIMER', payload: 0 });
         }
+        dispatch({ type: 'PAUSE_RESUME_WORKOUT' });
     };
 
-    const workoutControlProps = {
-        activeTimerIndex,
-        isWorkoutRunning,
-        timers: state.timers,
-        dispatch,
-        setActiveTimerIndex,
-        setIsWorkoutRunning,
+    const resetWorkout = () => {
+        dispatch({ type: 'RESET_WORKOUT' });
+    };
+
+    const fastForward = () => {
+        dispatch({ type: 'FAST_FORWARD' });
+    };
+
+    const handleTimerComplete = () => {
+        if (activeTimerIndex !== null && activeTimerIndex < state.timers.length - 1) {
+            dispatch({ type: 'COMPLETE_TIMER', payload: activeTimerIndex });
+        }
     };
 
     const renderActiveTimer = () => {
         if (activeTimerIndex === null || !state.timers[activeTimerIndex]) return null;
 
         const timer = state.timers[activeTimerIndex];
-        const handleComplete = () => {
-            if (activeTimerIndex < state.timers.length - 1) {
-                workoutControls.fastForward(workoutControlProps);
-            }
-        };
+        const currentProgress = state.currentProgress;
 
-        const props: TimerProps = {
-            onComplete: handleComplete,
+        const timerProps = {
+            onComplete: handleTimerComplete,
+            isRunning: isWorkoutRunning,
+            remainingTime: currentProgress?.remainingTime,
+            description: timer.description,
         };
 
         switch (timer.type) {
             case 'countdown':
-                return <Countdown {...props} initialTime={timer.duration} />;
+                return <Countdown {...timerProps} key={timer.id} initialTime={timer.duration} />;
+
             case 'stopwatch':
-                return <Stopwatch {...props} />;
+                return <Stopwatch {...timerProps} key={timer.id} />;
+
             case 'xy':
-                return <XY {...props} rounds={timer.config?.rounds} timePerRound={timer.config?.timePerRound} />;
+                return <XY {...timerProps} key={timer.id} rounds={timer.config?.rounds || 0} timePerRound={timer.config?.timePerRound || 0} currentRound={currentProgress?.currentRound} />;
+
             case 'tabata':
-                return <Tabata {...props} rounds={timer.config?.rounds} workTime={timer.config?.workTime} restTime={timer.config?.restTime} />;
+                return (
+                    <Tabata
+                        {...timerProps}
+                        key={timer.id}
+                        rounds={timer.config?.rounds || 0}
+                        workTime={timer.config?.workTime || 0}
+                        restTime={timer.config?.restTime || 0}
+                        currentRound={currentProgress?.currentRound}
+                        isWorkPhase={currentProgress?.isWorkPhase}
+                    />
+                );
+
             default:
                 return null;
         }
@@ -525,7 +177,7 @@ const AddTimerHomeView: React.FC = () => {
                 <InputGroup>
                     <label>
                         Timer Type:
-                        <select value={type} onChange={e => setType(e.target.value)}>
+                        <select value={type} onChange={e => setType(e.target.value as 'stopwatch' | 'countdown' | 'xy' | 'tabata')}>
                             <option value="stopwatch">Stopwatch</option>
                             <option value="countdown">Countdown</option>
                             <option value="xy">XY Timer</option>
@@ -534,152 +186,86 @@ const AddTimerHomeView: React.FC = () => {
                     </label>
                 </InputGroup>
 
-                {type === 'countdown' && (
+                <InputGroup>
+                    {/* biome-ignore lint/a11y/noLabelWithoutControl: <explanation> */}
+                    <label>
+                        Description (optional):
+                        <DescriptionInput value={description} onChange={e => setDescription(e.target.value)} placeholder="Describe what needs to be done (e.g., 50 push ups)" />
+                    </label>
+                </InputGroup>
+
+                {(type === 'stopwatch' || type === 'countdown') && (
                     <InputGroup>
                         <label>
-                            Hours:
-                            <input
-                                type="number"
-                                value={Math.floor(duration / 3600)}
-                                onChange={e => {
-                                    const hours = Number(e.target.value);
-                                    setDuration(hours * 3600 + Math.floor((duration % 3600) / 60) * 60 + (duration % 60));
-                                }}
-                                min={0}
-                            />
-                        </label>
-                        <label>
-                            Minutes:
-                            <input
-                                type="number"
-                                value={Math.floor((duration % 3600) / 60)}
-                                onChange={e => {
-                                    const minutes = Number(e.target.value);
-                                    setDuration(Math.floor(duration / 3600) * 3600 + minutes * 60 + (duration % 60));
-                                }}
-                                min={0}
-                                max={59}
-                            />
-                        </label>
-                        <label>
-                            Seconds:
-                            <input
-                                type="number"
-                                value={duration % 60}
-                                onChange={e => {
-                                    const seconds = Number(e.target.value);
-                                    setDuration(Math.floor(duration / 3600) * 3600 + Math.floor((duration % 3600) / 60) * 60 + seconds);
-                                }}
-                                min={0}
-                                max={59}
-                            />
+                            Duration (seconds):
+                            <input type="number" value={duration} onChange={e => setDuration(Math.max(1, Number(e.target.value)))} min={1} />
                         </label>
                     </InputGroup>
                 )}
 
                 {type === 'xy' && (
-                    <InputGroup>
-                        <label>
-                            Hours:
-                            <input
-                                type="number"
-                                value={Math.floor(duration / 3600)}
-                                onChange={e => {
-                                    const hours = Number(e.target.value);
-                                    setDuration(hours * 3600 + Math.floor((duration % 3600) / 60) * 60 + (duration % 60));
-                                }}
-                                min={0}
-                            />
-                        </label>
-                        <label>
-                            Minutes:
-                            <input
-                                type="number"
-                                value={Math.floor((duration % 3600) / 60)}
-                                onChange={e => {
-                                    const minutes = Number(e.target.value);
-                                    setDuration(Math.floor(duration / 3600) * 3600 + minutes * 60 + (duration % 60));
-                                }}
-                                min={0}
-                                max={59}
-                            />
-                        </label>
-                        <label>
-                            Seconds:
-                            <input
-                                type="number"
-                                value={duration % 60}
-                                onChange={e => {
-                                    const seconds = Number(e.target.value);
-                                    setDuration(Math.floor(duration / 3600) * 3600 + Math.floor((duration % 3600) / 60) * 60 + seconds);
-                                }}
-                                min={0}
-                                max={59}
-                            />
-                        </label>
-                        <label>
-                            Number of Rounds:
-                            <input type="number" value={rounds} onChange={e => setRounds(Number(e.target.value))} min={1} />
-                        </label>
-                    </InputGroup>
+                    <>
+                        <InputGroup>
+                            <label>
+                                Hours Per Round:
+                                <input type="number" value={hours} onChange={e => setHours(Math.max(0, Number(e.target.value)))} min={0} />
+                            </label>
+                            <label>
+                                Minutes Per Round:
+                                <input type="number" value={minutes} onChange={e => setMinutes(Math.max(0, Math.min(59, Number(e.target.value))))} min={0} max={59} />
+                            </label>
+                            <label>
+                                Seconds Per Round:
+                                <input type="number" value={seconds} onChange={e => setSeconds(Math.max(0, Math.min(59, Number(e.target.value))))} min={0} max={59} />
+                            </label>
+                        </InputGroup>
+                        <InputGroup>
+                            <label>
+                                Number of Rounds:
+                                <input type="number" value={rounds} onChange={e => setRounds(Math.max(1, Number(e.target.value)))} min={1} />
+                            </label>
+                        </InputGroup>
+                    </>
                 )}
 
                 {type === 'tabata' && (
                     <>
                         <InputGroup>
+                            {/* biome-ignore lint/a11y/noLabelWithoutControl: <explanation> */}
+                            <label>Work Time</label>
                             <label>
-                                Work Time:
-                                <input
-                                    type="number"
-                                    value={Math.floor(workTime / 60)}
-                                    onChange={e => {
-                                        const minutes = Number(e.target.value);
-                                        setWorkTime(minutes * 60 + (workTime % 60));
-                                    }}
-                                    min={0}
-                                />{' '}
-                                minutes
-                                <input
-                                    type="number"
-                                    value={workTime % 60}
-                                    onChange={e => {
-                                        const seconds = Number(e.target.value);
-                                        setWorkTime(Math.floor(workTime / 60) * 60 + seconds);
-                                    }}
-                                    min={0}
-                                    max={59}
-                                />{' '}
-                                seconds
+                                Hours:
+                                <input type="number" value={workHours} onChange={e => setWorkHours(Math.max(0, Number(e.target.value)))} min={0} />
                             </label>
                             <label>
-                                Rest Time:
-                                <input
-                                    type="number"
-                                    value={Math.floor(restTime / 60)}
-                                    onChange={e => {
-                                        const minutes = Number(e.target.value);
-                                        setRestTime(minutes * 60 + (restTime % 60));
-                                    }}
-                                    min={0}
-                                />{' '}
-                                minutes
-                                <input
-                                    type="number"
-                                    value={restTime % 60}
-                                    onChange={e => {
-                                        const seconds = Number(e.target.value);
-                                        setRestTime(Math.floor(restTime / 60) * 60 + seconds);
-                                    }}
-                                    min={0}
-                                    max={59}
-                                />{' '}
-                                seconds
+                                Minutes:
+                                <input type="number" value={workMinutes} onChange={e => setWorkMinutes(Math.max(0, Math.min(59, Number(e.target.value))))} min={0} max={59} />
+                            </label>
+                            <label>
+                                Seconds:
+                                <input type="number" value={workSeconds} onChange={e => setWorkSeconds(Math.max(0, Math.min(59, Number(e.target.value))))} min={0} max={59} />
+                            </label>
+                        </InputGroup>
+                        <InputGroup>
+                            {/* biome-ignore lint/a11y/noLabelWithoutControl: <explanation> */}
+                            <label>Rest Time</label>
+                            <label>
+                                Hours:
+                                <input type="number" value={restHours} onChange={e => setRestHours(Math.max(0, Number(e.target.value)))} min={0} />
+                            </label>
+                            <label>
+                                Minutes:
+                                <input type="number" value={restMinutes} onChange={e => setRestMinutes(Math.max(0, Math.min(59, Number(e.target.value))))} min={0} max={59} />
+                            </label>
+                            <label>
+                                Seconds:
+                                <input type="number" value={restSeconds} onChange={e => setRestSeconds(Math.max(0, Math.min(59, Number(e.target.value))))} min={0} max={59} />
                             </label>
                         </InputGroup>
                         <InputGroup>
                             <label>
                                 Rounds:
-                                <input type="number" value={rounds} onChange={e => setRounds(Number(e.target.value))} min={1} />
+                                <input type="number" value={rounds} onChange={e => setRounds(Math.max(1, Number(e.target.value)))} min={1} />
                             </label>
                         </InputGroup>
                     </>
@@ -688,26 +274,31 @@ const AddTimerHomeView: React.FC = () => {
                 <AddButton onClick={handleAddTimer}>Add Timer</AddButton>
             </ConfigSection>
 
-            <div>
+            {/* Active Timer Display */}
+            {activeTimerIndex !== null && <ActiveTimerContainer>{renderActiveTimer()}</ActiveTimerContainer>}
+
+            {/* Timer Queue with Controls */}
+            <div className="queue-container">
                 <h2>Workout Queue ({state.timers.length} timers)</h2>
+
+                {/* Workout Controls */}
+                <WorkoutControls>
+                    <button className="start" onClick={startWorkout}>
+                        {isWorkoutRunning ? 'Pause' : 'Start Workout'}
+                    </button>
+                    <button className="reset" onClick={resetWorkout}>
+                        Reset
+                    </button>
+                    <button className="forward" onClick={fastForward}>
+                        Skip Timer
+                    </button>
+                </WorkoutControls>
+
                 <TotalTimeDisplay>
                     Total Workout Time: <span>{formatTotalTime(state.totalTime)}</span>
                 </TotalTimeDisplay>
-                <div>
-                    <ControlButton className="start" onClick={() => workoutControls.startWorkout(workoutControlProps)}>
-                        {isWorkoutRunning ? 'Pause' : 'Start Workout'}
-                    </ControlButton>
-                    <ControlButton className="reset" onClick={() => workoutControls.resetWorkout(workoutControlProps)}>
-                        Reset
-                    </ControlButton>
-                    <ControlButton className="forward" onClick={() => workoutControls.fastForward(workoutControlProps)}>
-                        Skip Timer
-                    </ControlButton>
-                </div>
 
-                <TimerQueue activeTimerIndex={activeTimerIndex} onRemoveTimer={handleRemoveTimer} updateUrl={updateUrl} timers={state.timers} onTimersReorder={handleTimersReorder} />
-
-                {activeTimerIndex !== null && renderActiveTimer()}
+                <TimerQueue timers={state.timers} activeTimerIndex={activeTimerIndex} onRemoveTimer={handleRemoveTimer} onTimersReorder={handleTimersReorder} />
             </div>
         </Container>
     );

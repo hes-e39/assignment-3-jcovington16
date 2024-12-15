@@ -1,14 +1,19 @@
-// import { createContext, useEffect, useReducer } from 'react';
-// import type { Dispatch, ReactNode } from 'react';
+import { createContext, useEffect, useReducer } from 'react';
+import type { Dispatch, ReactNode } from 'react';
+import type { Timer } from '../../utils/helpers';
 
-// const TIMER_CONFIG_KEY = 'workout_timer_config';
-// const TIMER_STATE_KEY = 'workout_timer_state';
+const TIMER_STATE_KEY = 'workout_timer_state';
+const TIMERS_KEY = 'workout_timers';
+const WRITE_DELAY = 1000; // 1 second delay for localStorage writes
 
-// interface Timer {
+// export type TimerType = 'stopwatch' | 'countdown' | 'xy' | 'tabata';
+
+// export interface Timer {
 //     id: number;
-//     type: string;
+//     type: TimerType;
 //     duration: number;
-//     state: 'not running' | 'running' | 'completed';
+//     state: 'not running' | 'running' | 'paused' | 'completed';
+//     description: string;
 //     config?: {
 //         rounds?: number;
 //         workTime?: number;
@@ -16,276 +21,6 @@
 //         timePerRound?: number;
 //     };
 // }
-
-// interface TimerState {
-//     timers: Timer[];
-//     activeTimerIndex: number | null;
-//     isRunning: boolean;
-//     totalTime: number;
-//     currentProgress?: {
-//         remainingTime: number;
-//         currentRound?: number;
-//         isWorkPhase?: boolean;
-//     };
-// }
-
-// type TimerAction =
-//     | { type: 'ADD_TIMER'; payload: Timer }
-//     | { type: 'REMOVE_TIMER'; payload: number }
-//     | { type: 'START_TIMER'; payload: number }
-//     | { type: 'COMPLETE_TIMER'; payload: number }
-//     | { type: 'RESET_WORKOUT' }
-//     | { type: 'FAST_FORWARD' }
-//     | { type: 'PAUSE_RESUME_WORKOUT' }
-//     | { type: 'UPDATE_PROGRESS'; payload: {
-//         newActiveIndex: number | null;
-//         timers: Timer[]; remainingTime: number; currentRound?: number; isWorkPhase?: boolean
-// } }
-//     | { type: 'REORDER_TIMERS'; payload: { timers: Timer[]; newActiveIndex: number | null;}};
-
-// interface TimerContextType {
-//     state: TimerState;
-//     dispatch: Dispatch<TimerAction>;
-// }
-
-// function saveTimerConfig(timers: Timer[]) {
-//     localStorage.setItem(TIMER_CONFIG_KEY, JSON.stringify({ timers }));
-// }
-
-// function saveTimerState(state: Pick<TimerState, 'activeTimerIndex' | 'isRunning' | 'currentProgress'>) {
-//     localStorage.setItem(TIMER_STATE_KEY, JSON.stringify(state));
-// }
-
-// function loadTimerConfig(): Timer[] {
-//     const stored = localStorage.getItem(TIMER_CONFIG_KEY);
-//     return stored ? JSON.parse(stored).timers : [];
-// }
-
-// function loadTimerState(): Partial<TimerState> | null {
-//     const stored = localStorage.getItem(TIMER_STATE_KEY);
-//     return stored ? JSON.parse(stored) : null;
-// }
-
-// function getTimerStateInProgression(index: number, activeIndex: number | null, newIndex: number): Timer['state'] {
-//     if (index === activeIndex) return 'completed';
-//     if (index === newIndex) return 'running';
-//     return 'not running';
-// }
-
-// const loadInitialState = (): TimerState => {
-//     const savedTimers = loadTimerConfig();
-//     const savedState = loadTimerState();
-
-//     const initialState: TimerState = {
-//         timers: savedTimers,
-//         activeTimerIndex: savedState?.activeTimerIndex ?? null,
-//         isRunning: savedState?.isRunning ?? false,
-//         totalTime: savedTimers.reduce((sum, timer) => sum + timer.duration, 0),
-//         currentProgress: savedState?.currentProgress,
-//     };
-
-//     // If we have an active timer, make sure its state is correct
-//     if (initialState.activeTimerIndex !== null) {
-//         initialState.timers = initialState.timers.map((timer, index) => ({
-//             ...timer,
-//             state: index === initialState.activeTimerIndex ? (initialState.isRunning ? 'running' : 'not running') : 'not running',
-//         }));
-//     }
-
-//     return initialState;
-// };
-
-// function timerReducer(state: TimerState, action: TimerAction): TimerState {
-//     let newState: TimerState;
-
-//     switch (action.type) {
-//         case 'ADD_TIMER':
-//             newState = {
-//                 ...state,
-//                 timers: [...state.timers, action.payload],
-//                 totalTime: state.totalTime + action.payload.duration,
-//             };
-//             break;
-
-//         case 'REMOVE_TIMER':
-//             newState = {
-//                 ...state,
-//                 timers: state.timers.filter((_, idx) => idx !== action.payload),
-//                 totalTime: state.timers.reduce((sum, timer, idx) => (idx !== action.payload ? sum + timer.duration : sum), 0),
-//                 activeTimerIndex: state.activeTimerIndex === action.payload ? null : state.activeTimerIndex,
-//                 isRunning: state.activeTimerIndex === action.payload ? false : state.isRunning,
-//             };
-//             break;
-
-//         case 'START_TIMER':
-//             newState = {
-//                 ...state,
-//                 timers: state.timers.map((timer, idx) => ({
-//                     ...timer,
-//                     state: idx === action.payload ? 'running' : timer.state,
-//                 })),
-//                 activeTimerIndex: action.payload,
-//                 isRunning: true,
-//             };
-//             break;
-
-//         case 'COMPLETE_TIMER': {
-//             const nextIndex = action.payload + 1 < state.timers.length ? action.payload + 1 : null;
-//             newState = {
-//                 ...state,
-//                 timers: state.timers.map((timer, idx) => ({
-//                     ...timer,
-//                     state: idx === action.payload ? 'completed' : timer.state,
-//                 })),
-//                 activeTimerIndex: nextIndex,
-//                 isRunning: nextIndex !== null,
-//                 currentProgress:
-//                     nextIndex !== null
-//                         ? {
-//                               remainingTime: state.timers[nextIndex].duration,
-//                               currentRound: 1,
-//                               isWorkPhase: true,
-//                           }
-//                         : undefined,
-//             };
-//             break;
-//         }
-
-//         case 'RESET_WORKOUT':
-//             newState = {
-//                 ...state,
-//                 timers: state.timers.map(timer => ({
-//                     ...timer,
-//                     state: 'not running',
-//                 })),
-//                 activeTimerIndex: null,
-//                 isRunning: false,
-//                 currentProgress: undefined,
-//             };
-//             // Clear stored state on reset
-//             localStorage.removeItem(TIMER_STATE_KEY);
-//             break;
-
-//         case 'FAST_FORWARD': {
-//             if (state.activeTimerIndex === null) return state;
-//             const newIndex = state.activeTimerIndex + 1;
-
-//             newState = {
-//                 ...state,
-//                 activeTimerIndex: newIndex < state.timers.length ? newIndex : null,
-//                 isRunning: newIndex < state.timers.length,
-//                 timers: state.timers.map((timer, idx) => ({
-//                     ...timer,
-//                     state: getTimerStateInProgression(idx, state.activeTimerIndex, newIndex),
-//                 })),
-//                 currentProgress:
-//                     newIndex < state.timers.length
-//                         ? {
-//                               remainingTime: state.timers[newIndex].duration,
-//                               currentRound: 1,
-//                               isWorkPhase: true,
-//                           }
-//                         : undefined,
-//             };
-//             break;
-//         }
-
-//         case 'PAUSE_RESUME_WORKOUT': {
-//             const isRunning = !state.isRunning;
-//             newState = {
-//                 ...state,
-//                 isRunning,
-//                 timers: state.timers.map((timer, idx) => ({
-//                     ...timer,
-//                     state: idx === state.activeTimerIndex ? (isRunning ? 'running' : 'not running') : timer.state,
-//                 })),
-//             };
-//             break;
-//         }
-
-//         case 'REORDER_TIMERS':
-//             newState = {
-//                 ...state,
-//                 timers: action.payload.timers,
-//                 activeTimerIndex: action.payload.newActiveIndex,
-//                 totalTime: action.payload.timers.reduce((sum, timer) => sum + timer.duration, 0)
-//             };
-//             break;
-
-//         case 'UPDATE_PROGRESS':
-//             newState = {
-//                 ...state,
-//                 timers: action.payload.timers,
-//                 activeTimerIndex: action.payload.newActiveIndex,
-//                 totalTime: action.payload.timers.reduce((sum, timer) => sum + timer.duration, 0)
-//             };
-//             break;
-
-//         default:
-//             return state;
-//     }
-
-//     // Persist state if we have an active timer
-//     if (newState.activeTimerIndex !== null) {
-//         saveTimerConfig(newState.timers);
-//         saveTimerState({
-//             activeTimerIndex: newState.activeTimerIndex,
-//             isRunning: newState.isRunning,
-//             currentProgress: newState.currentProgress,
-//         });
-//     }
-
-//     return newState;
-// }
-
-// const TimerContext = createContext<TimerContextType>({
-//     state: loadInitialState(),
-//     dispatch: () => undefined,
-// });
-
-// export const TimerProvider = ({ children }: { children: ReactNode }) => {
-//     const [state, dispatch] = useReducer(timerReducer, null, loadInitialState);
-
-//     // Set up event listener for page unload
-//     useEffect(() => {
-//         const handleBeforeUnload = () => {
-//             if (state.activeTimerIndex !== null) {
-//                 saveTimerConfig(state.timers);
-//                 saveTimerState({
-//                     activeTimerIndex: state.activeTimerIndex,
-//                     isRunning: state.isRunning,
-//                     currentProgress: state.currentProgress,
-//                 });
-//             }
-//         };
-
-//         window.addEventListener('beforeunload', handleBeforeUnload);
-//         return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-//     }, [state]);
-
-//     return <TimerContext.Provider value={{ state, dispatch }}>{children}</TimerContext.Provider>;
-// };
-
-// export default TimerContext;
-
-import { createContext, useEffect, useReducer } from 'react';
-import type { Dispatch, ReactNode } from 'react';
-
-const TIMER_STATE_KEY = 'workout_timer_state';
-const WRITE_DELAY = 1000; // 1 second delay for localStorage writes
-
-interface Timer {
-    id: number;
-    type: string;
-    duration: number;
-    state: 'not running' | 'running' | 'completed';
-    config?: {
-        rounds?: number;
-        workTime?: number;
-        restTime?: number;
-        timePerRound?: number;
-    };
-}
 
 interface TimerState {
     timers: Timer[];
@@ -318,9 +53,14 @@ type TimerAction =
     | { type: 'REORDER_TIMERS'; payload: { timers: Timer[]; newActiveIndex: number | null } };
 
 let saveTimeout: NodeJS.Timeout;
+
 const saveToLocalStorage = (state: TimerState) => {
     clearTimeout(saveTimeout);
     saveTimeout = setTimeout(() => {
+        // Save timers separately
+        localStorage.setItem(TIMERS_KEY, JSON.stringify(state.timers));
+
+        // Save runtime state if there's an active timer
         if (state.activeTimerIndex !== null) {
             localStorage.setItem(
                 TIMER_STATE_KEY,
@@ -334,10 +74,14 @@ const saveToLocalStorage = (state: TimerState) => {
     }, WRITE_DELAY);
 };
 
-// Load the state from localStorage
-const loadFromLocalStorage = (): Partial<TimerState> => {
-    const saved = localStorage.getItem(TIMER_STATE_KEY);
-    return saved ? JSON.parse(saved) : {};
+const loadFromLocalStorage = (): { timers: Timer[]; savedState: Partial<TimerState> } => {
+    const timers = localStorage.getItem(TIMERS_KEY);
+    const savedState = localStorage.getItem(TIMER_STATE_KEY);
+
+    return {
+        timers: timers ? JSON.parse(timers) : [],
+        savedState: savedState ? JSON.parse(savedState) : {},
+    };
 };
 
 function timerReducer(state: TimerState, action: TimerAction): TimerState {
@@ -373,7 +117,6 @@ function timerReducer(state: TimerState, action: TimerAction): TimerState {
 
         case 'REMOVE_TIMER': {
             const newTimers = state.timers.filter((_, idx) => idx !== action.payload);
-
             const newActiveTimerIndex =
                 state.activeTimerIndex === null
                     ? null
@@ -395,7 +138,6 @@ function timerReducer(state: TimerState, action: TimerAction): TimerState {
 
         case 'REORDER_TIMERS': {
             const { timers, newActiveIndex } = action.payload;
-
             newState = {
                 ...state,
                 timers,
@@ -414,6 +156,11 @@ function timerReducer(state: TimerState, action: TimerAction): TimerState {
                 })),
                 activeTimerIndex: action.payload,
                 isRunning: true,
+                currentProgress: {
+                    remainingTime: state.timers[action.payload].duration,
+                    currentRound: 1,
+                    isWorkPhase: true,
+                },
             };
             break;
 
@@ -466,20 +213,20 @@ function timerReducer(state: TimerState, action: TimerAction): TimerState {
 
         case 'FAST_FORWARD': {
             if (state.activeTimerIndex === null) return state;
-            const newIndex = state.activeTimerIndex + 1;
+            const nextIndex = state.activeTimerIndex + 1;
 
             newState = {
                 ...state,
-                activeTimerIndex: newIndex < state.timers.length ? newIndex : null,
-                isRunning: newIndex < state.timers.length,
+                activeTimerIndex: nextIndex < state.timers.length ? nextIndex : null,
+                isRunning: nextIndex < state.timers.length,
                 timers: state.timers.map((timer, idx) => ({
                     ...timer,
-                    state: idx === state.activeTimerIndex ? 'completed' : idx === newIndex ? 'running' : timer.state,
+                    state: idx === state.activeTimerIndex ? 'completed' : idx === nextIndex ? 'running' : timer.state,
                 })),
                 currentProgress:
-                    newIndex < state.timers.length
+                    nextIndex < state.timers.length
                         ? {
-                              remainingTime: state.timers[newIndex].duration,
+                              remainingTime: state.timers[nextIndex].duration,
                               currentRound: 1,
                               isWorkPhase: true,
                           }
@@ -502,40 +249,40 @@ function timerReducer(state: TimerState, action: TimerAction): TimerState {
             return state;
     }
 
-    // Save state to localStorage
-    if (['START_TIMER', 'PAUSE_RESUME_WORKOUT', 'UPDATE_PROGRESS', 'REORDER_TIMERS'].includes(action.type)) {
+    // Save state to localStorage for specific actions
+    if (['ADD_TIMER', 'REMOVE_TIMER', 'EDIT_TIMER', 'REORDER_TIMERS', 'START_TIMER', 'COMPLETE_TIMER', 'PAUSE_RESUME_WORKOUT', 'UPDATE_PROGRESS'].includes(action.type)) {
         saveToLocalStorage(newState);
     }
 
     return newState;
 }
 
+const initialState: TimerState = {
+    timers: [],
+    activeTimerIndex: null,
+    isRunning: false,
+    totalTime: 0,
+};
+
 const TimerContext = createContext<TimerContextType>({
-    state: {
-        timers: [],
-        activeTimerIndex: null,
-        isRunning: false,
-        totalTime: 0,
-    },
+    state: initialState,
     dispatch: () => undefined,
 });
 
 export const TimerProvider = ({ children }: { children: ReactNode }) => {
+    const { timers, savedState } = loadFromLocalStorage();
+
     const [state, dispatch] = useReducer(timerReducer, {
-        timers: [],
-        activeTimerIndex: null,
-        isRunning: false,
-        totalTime: 0,
+        ...initialState,
+        timers,
+        ...savedState,
     });
 
-    // Load persisted state on mount
+    // Load timers on mount
+    // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
     useEffect(() => {
-        const savedState = loadFromLocalStorage();
-        if (savedState.activeTimerIndex !== undefined) {
-            dispatch({
-                type: 'UPDATE_PROGRESS',
-                payload: savedState.currentProgress || { remainingTime: 0 },
-            });
+        if (timers.length > 0) {
+            dispatch({ type: 'LOAD_TIMERS', payload: timers });
         }
     }, []);
 
@@ -543,4 +290,4 @@ export const TimerProvider = ({ children }: { children: ReactNode }) => {
 };
 
 export default TimerContext;
-export type { Timer, TimerState, TimerContextType, TimerAction };
+export type { TimerState, TimerContextType, TimerAction };

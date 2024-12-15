@@ -1,3 +1,4 @@
+import { ErrorBoundary } from 'react-error-boundary';
 import { Link, Outlet, RouterProvider, createHashRouter } from 'react-router-dom';
 import styled from 'styled-components';
 import Countdown from './components/timers/Countdown';
@@ -41,6 +42,16 @@ const NavItem = styled.li`
       }
     }
   `;
+
+const ErrorFallback = ({ error, resetErrorBoundary }: { error: Error; resetErrorBoundary: () => void }) => (
+    <div role="alert" style={{ padding: '2rem', textAlign: 'center' }}>
+        <h2>Something went wrong!</h2>
+        <p>{error.message}</p>
+        <button onClick={resetErrorBoundary} style={{ padding: '0.5rem 1rem', cursor: 'pointer' }}>
+            Try Again
+        </button>
+    </div>
+);
 
 const PageIndex = () => {
     return (
@@ -92,18 +103,20 @@ const router = createHashRouter([
             },
             {
                 path: 'xy',
-                element: <XY />,
+                element: <XY rounds={0} timePerRound={0} />,
             },
             {
                 path: 'tabata',
-                element: <Tabata />,
+                element: <Tabata rounds={0} workTime={0} restTime={0} />,
             },
         ],
     },
 ]);
 
-function App() {
-    return <RouterProvider router={router} />;
-}
+const App = () => (
+    <ErrorBoundary FallbackComponent={ErrorFallback}>
+        <RouterProvider router={router} />
+    </ErrorBoundary>
+);
 
 export default App;

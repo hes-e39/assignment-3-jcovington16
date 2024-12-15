@@ -1,11 +1,11 @@
 import type { Dispatch, SetStateAction } from 'react';
 
-// Types
 export interface Timer {
     id: number;
-    type: string;
+    type: 'stopwatch' | 'countdown' | 'xy' | 'tabata';
     duration: number;
     state: 'not running' | 'running' | 'completed';
+    description?: string;
     config?: {
         rounds?: number;
         workTime?: number;
@@ -153,9 +153,40 @@ export const workoutControls = {
     },
 };
 
-// biome-ignore lint/suspicious/noExplicitAny: <explanation>
-export const addTimer = (params: TimerParams, dispatch: (action: any) => void) => {
-    const newTimer = createTimer(params);
+export const addTimer = (
+    {
+        type,
+        duration,
+        rounds,
+        workTime,
+        restTime,
+        timePerRound,
+    }: {
+        type: 'stopwatch' | 'countdown' | 'xy' | 'tabata';
+        duration: number;
+        rounds?: number;
+        workTime?: number;
+        restTime?: number;
+        timePerRound?: number;
+    },
+    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+    dispatch: React.Dispatch<any>,
+) => {
+    const newTimer: Timer = {
+        id: Date.now(), // Ensure unique ID
+        type,
+        duration,
+        state: 'not running',
+        config: rounds
+            ? {
+                  rounds,
+                  workTime,
+                  restTime,
+                  timePerRound,
+              }
+            : undefined,
+    };
+
     dispatch({ type: 'ADD_TIMER', payload: newTimer });
 };
 
