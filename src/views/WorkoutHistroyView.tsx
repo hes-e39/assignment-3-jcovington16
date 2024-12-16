@@ -1,4 +1,3 @@
-// src/views/WorkoutHistoryView.tsx
 import { useContext } from 'react';
 import styled from 'styled-components';
 import TimerContext from '../components/contex/TimerContext';

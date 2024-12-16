@@ -197,7 +197,6 @@ export const toggleTimerActiveState = (remainingTime: number, isActive: boolean,
     }
 };
 
-// Storage constants and types
 export const TIMER_CONFIG_KEY = 'workout_timer_config';
 export const TIMER_STATE_KEY = 'workout_timer_state';
 

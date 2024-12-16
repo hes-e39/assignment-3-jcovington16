@@ -1,11 +1,11 @@
-import styled from "styled-components";
+import styled from 'styled-components';
 
 type ButtonProps = {
     onClick: () => void;
     children: React.ReactNode;
-}
+};
 
-const StartButton = styled.button`
+export const StartButton = styled.button`
   background-color: #4caf50;
   color: white;
   padding: 10px 20px;
@@ -20,7 +20,7 @@ const StartButton = styled.button`
 `;
 
 const Button = ({ onClick, children }: ButtonProps) => {
-    return <StartButton onClick={onClick}>{children}</StartButton>
-}
+    return <StartButton onClick={onClick}>{children}</StartButton>;
+};
 
 export default Button;

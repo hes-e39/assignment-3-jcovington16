@@ -7,6 +7,7 @@ import Stopwatch from '../components/timers/Stopwatch';
 import Tabata from '../components/timers/Tabata';
 import XY from '../components/timers/XY';
 import WorkoutShareControls from '../utils/WorkoutShare';
+
 // biome-ignore lint/style/useImportType: <explanation>
 import { Timer, formatTotalTime } from '../utils/helpers';
 
@@ -49,7 +50,7 @@ const AddTimerHomeView: React.FC = () => {
                 newTimer = {
                     id: Date.now(),
                     type: 'stopwatch',
-                    duration: 0, // Stopwatch starts at 0 and counts up
+                    duration: 0,
                     state: 'not running',
                     description: description || 'No description',
                 };
@@ -125,8 +126,13 @@ const AddTimerHomeView: React.FC = () => {
     };
 
     const handleTimerComplete = () => {
-        if (activeTimerIndex !== null && activeTimerIndex < state.timers.length - 1) {
-            dispatch({ type: 'COMPLETE_TIMER', payload: activeTimerIndex });
+        if (activeTimerIndex !== null) {
+            if (activeTimerIndex === state.timers.length - 1) {
+                dispatch({ type: 'COMPLETE_TIMER', payload: activeTimerIndex });
+                dispatch({ type: 'COMPLETE_WORKOUT' });
+            } else {
+                dispatch({ type: 'COMPLETE_TIMER', payload: activeTimerIndex });
+            }
         }
     };
 

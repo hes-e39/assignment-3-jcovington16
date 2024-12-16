@@ -92,7 +92,7 @@ export const InputGroup = styled.div`
         padding: 5px;
         border: 1px solid #ddd;
         border-radius: 4px;
-        color: black;
+        color: white;
     }
 `;
 

@@ -53,7 +53,8 @@ let saveTimeout: NodeJS.Timeout;
 const saveToLocalStorage = (state: TimerState) => {
     clearTimeout(saveTimeout);
     saveTimeout = setTimeout(() => {
-        // Save timers separately
+        // Save timers separately from each other
+
         localStorage.setItem(TIMERS_KEY, JSON.stringify(state.timers));
 
         localStorage.setItem(WORKOUT_HISTORY_KEY, JSON.stringify(state.workoutHistory));
@@ -291,19 +292,7 @@ function timerReducer(state: TimerState, action: TimerAction): TimerState {
     }
 
     // Save state to localStorage for specific actions
-    if (
-        [
-            'ADD_TIMER',
-            'REMOVE_TIMER',
-            'EDIT_TIMER',
-            'REORDER_TIMERS',
-            'START_TIMER',
-            'COMPLETE_TIMER',
-            'PAUSE_RESUME_WORKOUT',
-            'UPDATE_PROGRESS',
-            'COMPLETE_WORKOUT', // Add this
-        ].includes(action.type)
-    ) {
+    if (['ADD_TIMER', 'REMOVE_TIMER', 'EDIT_TIMER', 'REORDER_TIMERS', 'START_TIMER', 'COMPLETE_TIMER', 'PAUSE_RESUME_WORKOUT', 'UPDATE_PROGRESS', 'COMPLETE_WORKOUT'].includes(action.type)) {
         saveToLocalStorage(newState);
     }
 
