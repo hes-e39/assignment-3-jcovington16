@@ -8,6 +8,7 @@ import XY from './components/timers/XY';
 import AddTimeView from './views/AddTimerHomeView';
 import DocumentationView from './views/DocumentationView';
 import TimersView from './views/TimersView';
+import WorkoutHistoryView from './views/WorkoutHistroyView';
 
 const AppContainer = styled.div`
     min-height: 100vh;
@@ -68,6 +69,9 @@ const PageIndex = () => {
                     <NavItem>
                         <Link to="/docs">Documentation</Link>
                     </NavItem>
+                    <NavItem>
+                        <Link to="/history">History</Link>
+                    </NavItem>
                 </Nav>
             </Header>
             <Outlet />
@@ -92,6 +96,10 @@ const router = createHashRouter([
             {
                 path: 'docs',
                 element: <DocumentationView />,
+            },
+            {
+                path: 'history',
+                element: <WorkoutHistoryView />,
             },
             {
                 path: 'stopwatch',

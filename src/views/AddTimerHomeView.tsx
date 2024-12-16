@@ -117,7 +117,11 @@ const AddTimerHomeView: React.FC = () => {
     };
 
     const fastForward = () => {
-        dispatch({ type: 'FAST_FORWARD' });
+        if (activeTimerIndex !== null && activeTimerIndex === state.timers.length - 1) {
+            dispatch({ type: 'COMPLETE_WORKOUT' });
+        } else {
+            dispatch({ type: 'FAST_FORWARD' });
+        }
     };
 
     const handleTimerComplete = () => {

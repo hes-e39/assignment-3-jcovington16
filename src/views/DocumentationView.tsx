@@ -1,7 +1,5 @@
 import styled from 'styled-components';
-
 import DocumentComponent from '../components/documentation/DocumentComponent';
-
 import Loading from '../components/generic/Loading';
 import Countdown from '../components/timers/Countdown';
 import Stopwatch from '../components/timers/Stopwatch';
@@ -9,25 +7,28 @@ import Tabata from '../components/timers/Tabata';
 import XY from '../components/timers/XY';
 
 const Container = styled.div`
-  display: flex;
-  justify-content: center;
-  width: 100%;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    padding: 20px;
+
+    > div {
+        width: 100%;
+        max-width: 1200px;
+    }
 `;
 
 const Title = styled.div`
-  font-size: 2rem;
+    font-size: 2rem;
 `;
 
-/**
- * You can document your components by using the DocumentComponent component
- */
 const Documentation = () => {
     return (
         <Container>
             <div>
                 <Title>Documentation</Title>
                 <DocumentComponent
-                    title="Loading spinner "
+                    title="Loading spinner"
                     component={<Loading size="medium" color="#ffa2bf" />}
                     propDocs={[
                         {
@@ -40,7 +41,7 @@ const Documentation = () => {
                             prop: 'color',
                             description: 'Specifies the color of the loading spinner',
                             type: 'string',
-                            defaultValue: `"#ffa2bf"`,
+                            defaultValue: '#ffa2bf',
                         },
                     ]}
                 />
@@ -56,16 +57,28 @@ const Documentation = () => {
                             defaultValue: '0',
                         },
                         {
-                            prop: 'isPaused',
-                            description: 'Controls whether the timer is paused',
+                            prop: 'isRunning',
+                            description: 'External control for timer running state',
                             type: 'boolean',
                             defaultValue: 'false',
+                        },
+                        {
+                            prop: 'remainingTime',
+                            description: 'External control for remaining time',
+                            type: 'number',
+                            defaultValue: '0',
+                        },
+                        {
+                            prop: 'description',
+                            description: 'Description of the timer activity',
+                            type: 'string',
+                            defaultValue: 'None',
                         },
                         {
                             prop: 'onComplete',
                             description: 'Callback function when the countdown reaches zero',
                             type: 'function',
-                            defaultValue: 'undefined',
+                            defaultValue: 'null',
                         },
                     ]}
                 />
@@ -75,53 +88,28 @@ const Documentation = () => {
                     component={<Stopwatch />}
                     propDocs={[
                         {
-                            prop: 'startImmediately',
-                            description: 'Starts the stopwatch immediately on render',
+                            prop: 'isRunning',
+                            description: 'External control for timer running state',
                             type: 'boolean',
                             defaultValue: 'false',
                         },
                         {
-                            prop: 'lapInterval',
-                            description: 'Defines intervals for recording laps',
+                            prop: 'remainingTime',
+                            description: 'External control for elapsed time',
                             type: 'number',
-                            defaultValue: 'undefined',
+                            defaultValue: '0',
                         },
                         {
-                            prop: 'onStop',
-                            description: 'Callback function when the stopwatch is stopped',
-                            type: 'function',
-                            defaultValue: 'undefined',
-                        },
-                    ]}
-                />
-
-                <DocumentComponent
-                    title="Tabata Timer"
-                    component={<Tabata rounds={0} workTime={0} restTime={0} />}
-                    propDocs={[
-                        {
-                            prop: 'workTime',
-                            description: 'Duration of the work phase in seconds',
-                            type: 'number',
-                            defaultValue: '20',
-                        },
-                        {
-                            prop: 'restTime',
-                            description: 'Duration of the rest phase in seconds',
-                            type: 'number',
-                            defaultValue: '10',
-                        },
-                        {
-                            prop: 'rounds',
-                            description: 'Total number of work/rest cycles',
-                            type: 'number',
-                            defaultValue: '8',
+                            prop: 'description',
+                            description: 'Description of the timer activity',
+                            type: 'string',
+                            defaultValue: 'None',
                         },
                         {
                             prop: 'onComplete',
-                            description: 'Callback function when all rounds are completed',
+                            description: 'Callback function when stopwatch is stopped',
                             type: 'function',
-                            defaultValue: 'undefined',
+                            defaultValue: 'null',
                         },
                     ]}
                 />
@@ -131,28 +119,107 @@ const Documentation = () => {
                     component={<XY rounds={0} timePerRound={0} />}
                     propDocs={[
                         {
-                            prop: 'roundDuration',
-                            description: 'Time for each round in seconds',
-                            type: 'number',
-                            defaultValue: '60',
-                        },
-                        {
                             prop: 'rounds',
                             description: 'Total number of rounds',
                             type: 'number',
-                            defaultValue: '5',
+                            defaultValue: 'Required',
                         },
                         {
-                            prop: 'onRoundComplete',
-                            description: 'Callback function called at the end of each round',
-                            type: 'function',
-                            defaultValue: 'undefined',
+                            prop: 'timePerRound',
+                            description: 'Duration of each round in seconds',
+                            type: 'number',
+                            defaultValue: 'Required',
+                        },
+                        {
+                            prop: 'currentRound',
+                            description: 'External control for current round number',
+                            type: 'number',
+                            defaultValue: '1',
+                        },
+                        {
+                            prop: 'isRunning',
+                            description: 'External control for timer running state',
+                            type: 'boolean',
+                            defaultValue: 'false',
+                        },
+                        {
+                            prop: 'remainingTime',
+                            description: 'External control for remaining time in current round',
+                            type: 'number',
+                            defaultValue: '0',
+                        },
+                        {
+                            prop: 'description',
+                            description: 'Description of the timer activity',
+                            type: 'string',
+                            defaultValue: 'None',
                         },
                         {
                             prop: 'onComplete',
                             description: 'Callback function when all rounds are completed',
                             type: 'function',
-                            defaultValue: 'undefined',
+                            defaultValue: 'null',
+                        },
+                    ]}
+                />
+
+                <DocumentComponent
+                    title="Tabata Timer"
+                    component={<Tabata rounds={0} workTime={0} restTime={0} />}
+                    propDocs={[
+                        {
+                            prop: 'rounds',
+                            description: 'Total number of work/rest cycles',
+                            type: 'number',
+                            defaultValue: 'Required',
+                        },
+                        {
+                            prop: 'workTime',
+                            description: 'Duration of work intervals in seconds',
+                            type: 'number',
+                            defaultValue: 'Required',
+                        },
+                        {
+                            prop: 'restTime',
+                            description: 'Duration of rest intervals in seconds',
+                            type: 'number',
+                            defaultValue: 'Required',
+                        },
+                        {
+                            prop: 'currentRound',
+                            description: 'External control for current round number',
+                            type: 'number',
+                            defaultValue: '1',
+                        },
+                        {
+                            prop: 'isRunning',
+                            description: 'External control for timer running state',
+                            type: 'boolean',
+                            defaultValue: 'false',
+                        },
+                        {
+                            prop: 'remainingTime',
+                            description: 'External control for remaining time in current interval',
+                            type: 'number',
+                            defaultValue: '0',
+                        },
+                        {
+                            prop: 'isWorkPhase',
+                            description: 'External control for work/rest phase',
+                            type: 'boolean',
+                            defaultValue: 'true',
+                        },
+                        {
+                            prop: 'description',
+                            description: 'Description of the timer activity',
+                            type: 'string',
+                            defaultValue: 'None',
+                        },
+                        {
+                            prop: 'onComplete',
+                            description: 'Callback function when all rounds are completed',
+                            type: 'function',
+                            defaultValue: 'null',
                         },
                     ]}
                 />

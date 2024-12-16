@@ -5,22 +5,7 @@ import type { Timer } from '../../utils/helpers';
 const TIMER_STATE_KEY = 'workout_timer_state';
 const TIMERS_KEY = 'workout_timers';
 const WRITE_DELAY = 1000; // 1 second delay for localStorage writes
-
-// export type TimerType = 'stopwatch' | 'countdown' | 'xy' | 'tabata';
-
-// export interface Timer {
-//     id: number;
-//     type: TimerType;
-//     duration: number;
-//     state: 'not running' | 'running' | 'paused' | 'completed';
-//     description: string;
-//     config?: {
-//         rounds?: number;
-//         workTime?: number;
-//         restTime?: number;
-//         timePerRound?: number;
-//     };
-// }
+const WORKOUT_HISTORY_KEY = 'workout_history';
 
 interface TimerState {
     timers: Timer[];
@@ -32,6 +17,15 @@ interface TimerState {
         currentRound?: number;
         isWorkPhase?: boolean;
     };
+    workoutHistory: WorkoutHistory[];
+}
+
+interface WorkoutHistory {
+    id: number;
+    date: string;
+    timers: Timer[];
+    totalTime: number;
+    completed: boolean;
 }
 
 interface TimerContextType {
@@ -50,7 +44,9 @@ type TimerAction =
     | { type: 'PAUSE_RESUME_WORKOUT' }
     | { type: 'UPDATE_PROGRESS'; payload: { remainingTime: number; currentRound?: number; isWorkPhase?: boolean } }
     | { type: 'LOAD_TIMERS'; payload: Timer[] }
-    | { type: 'REORDER_TIMERS'; payload: { timers: Timer[]; newActiveIndex: number | null } };
+    | { type: 'REORDER_TIMERS'; payload: { timers: Timer[]; newActiveIndex: number | null } }
+    | { type: 'COMPLETE_WORKOUT' }
+    | { type: 'LOAD_WORKOUT_HISTORY'; payload: WorkoutHistory[] };
 
 let saveTimeout: NodeJS.Timeout;
 
@@ -59,6 +55,8 @@ const saveToLocalStorage = (state: TimerState) => {
     saveTimeout = setTimeout(() => {
         // Save timers separately
         localStorage.setItem(TIMERS_KEY, JSON.stringify(state.timers));
+
+        localStorage.setItem(WORKOUT_HISTORY_KEY, JSON.stringify(state.workoutHistory));
 
         // Save runtime state if there's an active timer
         if (state.activeTimerIndex !== null) {
@@ -74,13 +72,15 @@ const saveToLocalStorage = (state: TimerState) => {
     }, WRITE_DELAY);
 };
 
-const loadFromLocalStorage = (): { timers: Timer[]; savedState: Partial<TimerState> } => {
+const loadFromLocalStorage = (): { timers: Timer[]; savedState: Partial<TimerState>; workoutHistory: WorkoutHistory[] } => {
     const timers = localStorage.getItem(TIMERS_KEY);
     const savedState = localStorage.getItem(TIMER_STATE_KEY);
+    const workoutHistory = localStorage.getItem(WORKOUT_HISTORY_KEY);
 
     return {
         timers: timers ? JSON.parse(timers) : [],
         savedState: savedState ? JSON.parse(savedState) : {},
+        workoutHistory: workoutHistory ? JSON.parse(workoutHistory) : [],
     };
 };
 
@@ -245,12 +245,65 @@ function timerReducer(state: TimerState, action: TimerAction): TimerState {
             };
             break;
 
+        case 'COMPLETE_WORKOUT': {
+            // Only add to history if there are timers and they're all completed
+            if (state.timers.length === 0) return state;
+
+            const allTimersCompleted = state.timers.every(timer => timer.state === 'completed');
+            if (!allTimersCompleted) return state;
+
+            const newWorkout: WorkoutHistory = {
+                id: Date.now(),
+                date: new Date().toISOString(),
+                timers: state.timers,
+                totalTime: state.totalTime,
+                completed: true,
+            };
+
+            const newHistory = [...state.workoutHistory, newWorkout];
+
+            // Save workout history to localStorage
+            localStorage.setItem(WORKOUT_HISTORY_KEY, JSON.stringify(newHistory));
+
+            newState = {
+                ...state,
+                workoutHistory: newHistory,
+                activeTimerIndex: null,
+                isRunning: false,
+                currentProgress: undefined,
+                timers: state.timers.map(timer => ({
+                    ...timer,
+                    state: 'not running',
+                })),
+            };
+            break;
+        }
+
+        case 'LOAD_WORKOUT_HISTORY':
+            newState = {
+                ...state,
+                workoutHistory: action.payload,
+            };
+            break;
+
         default:
             return state;
     }
 
     // Save state to localStorage for specific actions
-    if (['ADD_TIMER', 'REMOVE_TIMER', 'EDIT_TIMER', 'REORDER_TIMERS', 'START_TIMER', 'COMPLETE_TIMER', 'PAUSE_RESUME_WORKOUT', 'UPDATE_PROGRESS'].includes(action.type)) {
+    if (
+        [
+            'ADD_TIMER',
+            'REMOVE_TIMER',
+            'EDIT_TIMER',
+            'REORDER_TIMERS',
+            'START_TIMER',
+            'COMPLETE_TIMER',
+            'PAUSE_RESUME_WORKOUT',
+            'UPDATE_PROGRESS',
+            'COMPLETE_WORKOUT', // Add this
+        ].includes(action.type)
+    ) {
         saveToLocalStorage(newState);
     }
 
@@ -262,6 +315,7 @@ const initialState: TimerState = {
     activeTimerIndex: null,
     isRunning: false,
     totalTime: 0,
+    workoutHistory: [],
 };
 
 const TimerContext = createContext<TimerContextType>({
@@ -270,19 +324,23 @@ const TimerContext = createContext<TimerContextType>({
 });
 
 export const TimerProvider = ({ children }: { children: ReactNode }) => {
-    const { timers, savedState } = loadFromLocalStorage();
+    const { timers, savedState, workoutHistory } = loadFromLocalStorage();
 
     const [state, dispatch] = useReducer(timerReducer, {
         ...initialState,
         timers,
+        workoutHistory,
         ...savedState,
     });
 
-    // Load timers on mount
+    // Load timers on mount?
     // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
     useEffect(() => {
         if (timers.length > 0) {
             dispatch({ type: 'LOAD_TIMERS', payload: timers });
+        }
+        if (workoutHistory.length > 0) {
+            dispatch({ type: 'LOAD_WORKOUT_HISTORY', payload: workoutHistory });
         }
     }, []);
 
