@@ -687,6 +687,7 @@ ${ge.current.stack}
     border-left: 3px solid #4caf50;
     margin: 5px 0;
     background: #f5f5f5;
+    color: black;
 `,DT=j.div`
     font-size: 1.1rem;
     color: #666;
