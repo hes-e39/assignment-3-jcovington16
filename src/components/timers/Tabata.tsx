@@ -83,29 +83,56 @@ const Tabata: React.FC<TabataProps> = ({
         }
     }, [externalRemainingTime, externalCurrentRound, externalIsWorkPhase]);
 
+    // useEffect(() => {
+    //     let interval: NodeJS.Timeout | undefined;
+    //     const isTimerRunning = isRunning || isActive;
+
+    //     if (isTimerRunning && remainingTime > 0) {
+    //         interval = setInterval(() => setRemainingTime(prev => prev - 1), 1000);
+    //     } else if (isTimerRunning && remainingTime === 0) {
+    //         if (isWorkPhase) {
+    //             setRemainingTime(restTime);
+    //             setIsWorkPhase(false);
+    //         } else {
+    //             if (currentRound < totalRounds) {
+    //                 setCurrentRound(prev => prev + 1);
+    //                 setRemainingTime(workTime);
+    //                 setIsWorkPhase(true);
+    //             } else {
+    //                 setIsActive(false);
+    //                 if (onComplete) onComplete();
+    //             }
+    //         }
+    //     }
+    //     return () => clearInterval(interval);
+    // }, [isRunning, isActive, remainingTime, isWorkPhase, currentRound, totalRounds, workTime, restTime, onComplete]);
     useEffect(() => {
         let interval: NodeJS.Timeout | undefined;
         const isTimerRunning = isRunning || isActive;
-
+    
         if (isTimerRunning && remainingTime > 0) {
             interval = setInterval(() => setRemainingTime(prev => prev - 1), 1000);
         } else if (isTimerRunning && remainingTime === 0) {
-            if (isWorkPhase) {
-                setRemainingTime(restTime);
-                setIsWorkPhase(false);
-            } else {
-                if (currentRound < totalRounds) {
-                    setCurrentRound(prev => prev + 1);
-                    setRemainingTime(workTime);
-                    setIsWorkPhase(true);
+            setTimeout(() => {
+                if (isWorkPhase) {
+                    setRemainingTime(restTime);
+                    setIsWorkPhase(false);
                 } else {
-                    setIsActive(false);
-                    if (onComplete) onComplete();
+                    if (currentRound < totalRounds) {
+                        setCurrentRound(prev => prev + 1);
+                        setRemainingTime(workTime);
+                        setIsWorkPhase(true);
+                    } else {
+                        setIsActive(false);
+                        if (onComplete) onComplete();
+                    }
                 }
-            }
+            }, 0);  // Defer state update
         }
+    
         return () => clearInterval(interval);
     }, [isRunning, isActive, remainingTime, isWorkPhase, currentRound, totalRounds, workTime, restTime, onComplete]);
+    
 
     const handleStart = () => {
         setIsActive(!isActive);

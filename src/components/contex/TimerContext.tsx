@@ -149,6 +149,9 @@ function timerReducer(state: TimerState, action: TimerAction): TimerState {
         }
 
         case 'START_TIMER':
+            const timer = state.timers[action.payload];
+            const initialTime = timer.type === 'stopwatch' ? 0 : timer.type === 'tabata' ? timer.config?.workTime || 0 : timer.duration;
+            
             newState = {
                 ...state,
                 timers: state.timers.map((timer, idx) => ({
@@ -158,7 +161,7 @@ function timerReducer(state: TimerState, action: TimerAction): TimerState {
                 activeTimerIndex: action.payload,
                 isRunning: true,
                 currentProgress: {
-                    remainingTime: state.timers[action.payload].duration,
+                    remainingTime: initialTime,
                     currentRound: 1,
                     isWorkPhase: true,
                 },
@@ -237,6 +240,21 @@ function timerReducer(state: TimerState, action: TimerAction): TimerState {
         }
 
         case 'UPDATE_PROGRESS':
+            const currentTimer = state.timers[state.activeTimerIndex || 0];
+            const isStopwatchComplete = currentTimer?.type === 'stopwatch' && 
+                                       action.payload.remainingTime >= currentTimer.duration;
+        
+            if (isStopwatchComplete) {
+                return {
+                    ...state,
+                    isRunning: false,
+                    currentProgress: {
+                        ...state.currentProgress,
+                        remainingTime: currentTimer.duration,
+                    },
+                };
+            }
+        
             newState = {
                 ...state,
                 currentProgress: {
@@ -244,7 +262,7 @@ function timerReducer(state: TimerState, action: TimerAction): TimerState {
                     ...action.payload,
                 },
             };
-            break;
+        break;
 
         case 'COMPLETE_WORKOUT': {
             // Only add to history if there are timers and they're all completed

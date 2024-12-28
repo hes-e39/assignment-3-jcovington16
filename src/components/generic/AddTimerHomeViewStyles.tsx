@@ -119,6 +119,7 @@ export const DescriptionInput = styled.textarea`
     border-radius: 4px;
     resize: vertical;
     min-height: 60px;
+    color: white;
 `;
 
 export const ConfigSection = styled.div`

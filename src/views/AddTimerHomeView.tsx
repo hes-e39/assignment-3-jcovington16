@@ -50,40 +50,44 @@ const AddTimerHomeView: React.FC = () => {
                 newTimer = {
                     id: Date.now(),
                     type: 'stopwatch',
-                    duration: 0,
+                    duration: Number(duration),
                     state: 'not running',
                     description: description || 'No description',
                 };
-                break;
+            break;
 
             case 'xy':
+                const xyDuration = hours * 3600 + minutes * 60 + seconds;
                 newTimer = {
                     id: Date.now(),
                     type: 'xy',
-                    duration: duration * rounds,
+                    duration: xyDuration * rounds,
                     state: 'not running',
                     description: description || '',
                     config: {
                         rounds,
-                        timePerRound: duration,
+                        timePerRound: xyDuration,
                     },
                 };
-                break;
+            break;
 
-            case 'tabata':
+            case 'tabata': {
+                const totalWorkTime = workHours * 3600 + workMinutes * 60 + workSeconds;
+                const totalRestTime = restHours * 3600 + restMinutes * 60 + restSeconds;
                 newTimer = {
                     id: Date.now(),
                     type: 'tabata',
-                    duration: rounds * (workTime + restTime),
+                    duration: rounds * (totalWorkTime + totalRestTime),
                     state: 'not running',
-                    description: description,
+                    description: description || '',
                     config: {
                         rounds,
-                        workTime,
-                        restTime,
+                        workTime: totalWorkTime,
+                        restTime: totalRestTime,
                     },
                 };
                 break;
+            }
 
             default:
                 return;
@@ -106,12 +110,6 @@ const AddTimerHomeView: React.FC = () => {
         });
     };
 
-    // const startWorkout = () => {
-    //     if (!isWorkoutRunning && state.timers.length > 0) {
-    //         dispatch({ type: 'START_TIMER', payload: 0 });
-    //     }
-    //     dispatch({ type: 'PAUSE_RESUME_WORKOUT' });
-    // };
     const startWorkout = () => {
         if (!isWorkoutRunning && state.timers.length > 0) {
             if (activeTimerIndex === null) {
@@ -144,82 +142,50 @@ const AddTimerHomeView: React.FC = () => {
         }
     };
 
-    // const renderActiveTimer = () => {
-    //     if (activeTimerIndex === null || !state.timers[activeTimerIndex]) return null;
-
-    //     const timer = state.timers[activeTimerIndex];
-    //     const currentProgress = state.currentProgress;
-
-    //     const timerProps = {
-    //         onComplete: handleTimerComplete,
-    //         isRunning: isWorkoutRunning,
-    //         remainingTime: currentProgress?.remainingTime,
-    //         description: timer.description,
-    //         dispatch,
-    //     };
-
-    //     switch (timer.type) {
-    //         case 'countdown':
-    //             return <Countdown {...timerProps} key={timer.id} initialTime={timer.duration} />;
-
-    //         case 'stopwatch':
-    //             return <Stopwatch {...timerProps} key={timer.id} />;
-
-    //         case 'xy':
-    //             return <XY {...timerProps} key={timer.id} rounds={timer.config?.rounds || 0} timePerRound={timer.config?.timePerRound || 0} currentRound={currentProgress?.currentRound} />;
-
-    //         case 'tabata':
-    //             return (
-    //                 <Tabata
-    //                     {...timerProps}
-    //                     key={timer.id}
-    //                     rounds={timer.config?.rounds || 0}
-    //                     workTime={timer.config?.workTime || 0}
-    //                     restTime={timer.config?.restTime || 0}
-    //                     currentRound={currentProgress?.currentRound}
-    //                     isWorkPhase={currentProgress?.isWorkPhase}
-    //                 />
-    //             );
-
-    //         default:
-    //             return null;
-    //     }
-    // };
     const renderActiveTimer = () => {
         if (activeTimerIndex === null || !state.timers[activeTimerIndex]) return null;
-     
+    
         const timer = state.timers[activeTimerIndex];
-        const currentProgress = state.currentProgress;
-     
+    
         const commonProps = {
-            isRunning: isWorkoutRunning,
-            remainingTime: currentProgress?.remainingTime,
             description: timer.description,
-            onComplete: () => {
-                if (activeTimerIndex < state.timers.length - 1) {
-                    fastForward();
-                }
-            }
+            isRunning: isWorkoutRunning,
+            onComplete: handleTimerComplete
         };
-     
+    
         switch (timer.type) {
             case 'countdown':
-                return <Countdown {...commonProps} key={timer.id} initialTime={timer.duration} />;
-     
+                return (
+                    <Countdown
+                        {...commonProps}
+                        key={timer.id}
+                        initialTime={timer.duration}
+                        remainingTime={state.currentProgress?.remainingTime}
+                    />
+                );
+
             case 'stopwatch':
-                return <Stopwatch {...commonProps} key={timer.id} />;
-     
+                return (
+                    <Stopwatch
+                        {...commonProps}
+                        key={timer.id}
+                        duration={timer.duration}
+                        remainingTime={state.currentProgress?.remainingTime}
+                    />
+                );
+    
             case 'xy':
                 return (
                     <XY
                         {...commonProps}
-                        key={timer.id} 
+                        key={timer.id}
                         rounds={timer.config?.rounds || 0}
                         timePerRound={timer.config?.timePerRound || 0}
-                        currentRound={currentProgress?.currentRound}
+                        currentRound={state.currentProgress?.currentRound}
+                        remainingTime={state.currentProgress?.remainingTime}
                     />
                 );
-     
+    
             case 'tabata':
                 return (
                     <Tabata
@@ -228,15 +194,16 @@ const AddTimerHomeView: React.FC = () => {
                         rounds={timer.config?.rounds || 0}
                         workTime={timer.config?.workTime || 0}
                         restTime={timer.config?.restTime || 0}
-                        currentRound={currentProgress?.currentRound}
-                        isWorkPhase={currentProgress?.isWorkPhase}
+                        currentRound={state.currentProgress?.currentRound}
+                        isWorkPhase={state.currentProgress?.isWorkPhase}
+                        remainingTime={state.currentProgress?.remainingTime}
                     />
                 );
-     
+    
             default:
                 return null;
         }
-     };
+    };
 
     return (
         <Container>

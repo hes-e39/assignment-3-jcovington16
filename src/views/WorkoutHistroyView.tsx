@@ -64,14 +64,14 @@ const WorkoutHistoryView = () => {
     return (
         <Container>
             <h1>Workout History</h1>
-            {state.workoutHistory.map(workout => (
-                <WorkoutCard key={workout.id}>
+            {state.workoutHistory.map((workout, index) => (
+                <WorkoutCard key={`${workout.id}-${index}`}>
                     <WorkoutDate>
                         {new Date(workout.date).toLocaleDateString()} {new Date(workout.date).toLocaleTimeString()}
                     </WorkoutDate>
                     <TimerList>
-                        {workout.timers.map(timer => (
-                            <TimerItem key={timer.id}>
+                        {workout.timers.map((timer, timerIndex) => (
+                            <TimerItem key={`${timer.id}-${timerIndex}`}>
                                 <div>
                                     <strong>{timer.type.toUpperCase()}</strong>
                                     {timer.description && <div>Description: {timer.description}</div>}

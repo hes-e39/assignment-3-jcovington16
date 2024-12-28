@@ -63,24 +63,45 @@ const XY: React.FC<XYProps> = ({
         }
     }, [externalRemainingTime, externalCurrentRound]);
 
+    // useEffect(() => {
+    //     let interval: NodeJS.Timeout | undefined;
+
+    //     const isTimerRunning = isRunning || isActive;
+
+    //     if (isTimerRunning && remainingTime > 0) {
+    //         interval = setInterval(() => setRemainingTime(prev => prev - 1), 1000);
+    //     } else if (isTimerRunning && remainingTime === 0) {
+    //         if (currentRound < totalRounds) {
+    //             setCurrentRound(prev => prev + 1);
+    //             setRemainingTime(roundTime);
+    //         } else {
+    //             setIsActive(false);
+    //             if (onComplete) onComplete();
+    //         }
+    //     }
+    //     return () => clearInterval(interval);
+    // }, [isRunning, isActive, remainingTime, currentRound, totalRounds, roundTime, onComplete]);
     useEffect(() => {
         let interval: NodeJS.Timeout | undefined;
-
         const isTimerRunning = isRunning || isActive;
-
+    
         if (isTimerRunning && remainingTime > 0) {
             interval = setInterval(() => setRemainingTime(prev => prev - 1), 1000);
         } else if (isTimerRunning && remainingTime === 0) {
-            if (currentRound < totalRounds) {
-                setCurrentRound(prev => prev + 1);
-                setRemainingTime(roundTime);
-            } else {
-                setIsActive(false);
-                if (onComplete) onComplete();
-            }
+            setTimeout(() => {
+                if (currentRound < totalRounds) {
+                    setCurrentRound(prev => prev + 1);
+                    setRemainingTime(roundTime);
+                } else {
+                    setIsActive(false);
+                    if (onComplete) onComplete();
+                }
+            }, 0);  // Defer state update
         }
+    
         return () => clearInterval(interval);
     }, [isRunning, isActive, remainingTime, currentRound, totalRounds, roundTime, onComplete]);
+    
 
     const handleStart = () => {
         setIsActive(!isActive);

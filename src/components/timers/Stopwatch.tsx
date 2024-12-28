@@ -47,26 +47,49 @@ const Stopwatch: React.FC<StopwatchProps> = ({ isRunning: externalIsRunning, rem
         }
     }, [externalTime]);
 
+    // useEffect(() => {
+    //     let interval: NodeJS.Timeout | undefined;
+    //     const isTimerRunning = externalIsRunning ?? isActive;
+
+    //     if (isTimerRunning) {
+    //         interval = setInterval(() => {
+    //             setTime(prevTime => {
+    //                 const newTime = prevTime + 1;
+    //                 if (duration > 0 && newTime >= duration) {
+    //                     if (onComplete) onComplete();
+    //                     if (externalIsRunning === undefined) setIsActive(false);
+    //                     return duration;
+    //                 }
+    //                 return newTime;
+    //             });
+    //         }, 1000); // Changed to 1000ms (1 second)
+    //     }
+
+    //     return () => clearInterval(interval);
+    // }, [isActive, externalIsRunning, duration, onComplete]);
     useEffect(() => {
         let interval: NodeJS.Timeout | undefined;
         const isTimerRunning = externalIsRunning ?? isActive;
-
+    
         if (isTimerRunning) {
             interval = setInterval(() => {
                 setTime(prevTime => {
                     const newTime = prevTime + 1;
                     if (duration > 0 && newTime >= duration) {
-                        if (onComplete) onComplete();
-                        if (externalIsRunning === undefined) setIsActive(false);
+                        setTimeout(() => {
+                            if (onComplete) onComplete();
+                            if (externalIsRunning === undefined) setIsActive(false);
+                        }, 0);  // Defer state update
                         return duration;
                     }
                     return newTime;
                 });
-            }, 1000); // Changed to 1000ms (1 second)
+            }, 1000);
         }
-
+    
         return () => clearInterval(interval);
     }, [isActive, externalIsRunning, duration, onComplete]);
+    
 
     const handleStart = () => {
         if (externalIsRunning === undefined) {

@@ -69,25 +69,47 @@ const Countdown: React.FC<CountdownProps> = ({ initialTime, isRunning: externalI
     }, [initialTime, externalRemainingTime]);
 
     // Timer logic
+    // useEffect(() => {
+    //     let interval: NodeJS.Timeout | undefined;
+    //     const isTimerRunning = externalIsRunning ?? isActive;
+
+    //     if (isTimerRunning && remainingTime > 0) {
+    //         interval = setInterval(() => {
+    //             setRemainingTime(prev => {
+    //                 const newTime = prev - 1;
+    //                 if (newTime <= 0) {
+    //                     if (onComplete) onComplete();
+    //                     if (externalIsRunning === undefined) setIsActive(false);
+    //                 }
+    //                 return newTime;
+    //             });
+    //         }, 1000);
+    //     }
+
+    //     return () => clearInterval(interval);
+    // }, [isActive, externalIsRunning, remainingTime, onComplete]);
     useEffect(() => {
         let interval: NodeJS.Timeout | undefined;
         const isTimerRunning = externalIsRunning ?? isActive;
-
+    
         if (isTimerRunning && remainingTime > 0) {
             interval = setInterval(() => {
                 setRemainingTime(prev => {
                     const newTime = prev - 1;
                     if (newTime <= 0) {
-                        if (onComplete) onComplete();
-                        if (externalIsRunning === undefined) setIsActive(false);
+                        setTimeout(() => {
+                            if (onComplete) onComplete();
+                            if (externalIsRunning === undefined) setIsActive(false);
+                        }, 0);  // Defer state update
                     }
                     return newTime;
                 });
             }, 1000);
         }
-
+    
         return () => clearInterval(interval);
     }, [isActive, externalIsRunning, remainingTime, onComplete]);
+    
 
     const handleStart = () => {
         if (externalIsRunning === undefined) {
