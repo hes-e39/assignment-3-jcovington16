@@ -15,8 +15,6 @@ const AddTimerHomeView: React.FC = () => {
     const { state, dispatch } = useContext(TimerContext);
     const [type, setType] = useState<'stopwatch' | 'countdown' | 'xy' | 'tabata'>('stopwatch');
     const [duration, setDuration] = useState<number>(30);
-    const [workTime] = useState<number>(20);
-    const [restTime] = useState<number>(10);
     const [rounds, setRounds] = useState<number>(8);
     const [hours, setHours] = useState(0);
     const [minutes, setMinutes] = useState(0);
