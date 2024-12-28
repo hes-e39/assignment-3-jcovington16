@@ -33,6 +33,7 @@ const TimerItem = styled.div`
     border-left: 3px solid #4caf50;
     margin: 5px 0;
     background: #f5f5f5;
+    color: black;
 `;
 
 const TotalTime = styled.div`
