@@ -106,9 +106,17 @@ const AddTimerHomeView: React.FC = () => {
         });
     };
 
+    // const startWorkout = () => {
+    //     if (!isWorkoutRunning && state.timers.length > 0) {
+    //         dispatch({ type: 'START_TIMER', payload: 0 });
+    //     }
+    //     dispatch({ type: 'PAUSE_RESUME_WORKOUT' });
+    // };
     const startWorkout = () => {
         if (!isWorkoutRunning && state.timers.length > 0) {
-            dispatch({ type: 'START_TIMER', payload: 0 });
+            if (activeTimerIndex === null) {
+                dispatch({ type: 'START_TIMER', payload: 0 });
+            }
         }
         dispatch({ type: 'PAUSE_RESUME_WORKOUT' });
     };
@@ -136,33 +144,86 @@ const AddTimerHomeView: React.FC = () => {
         }
     };
 
+    // const renderActiveTimer = () => {
+    //     if (activeTimerIndex === null || !state.timers[activeTimerIndex]) return null;
+
+    //     const timer = state.timers[activeTimerIndex];
+    //     const currentProgress = state.currentProgress;
+
+    //     const timerProps = {
+    //         onComplete: handleTimerComplete,
+    //         isRunning: isWorkoutRunning,
+    //         remainingTime: currentProgress?.remainingTime,
+    //         description: timer.description,
+    //         dispatch,
+    //     };
+
+    //     switch (timer.type) {
+    //         case 'countdown':
+    //             return <Countdown {...timerProps} key={timer.id} initialTime={timer.duration} />;
+
+    //         case 'stopwatch':
+    //             return <Stopwatch {...timerProps} key={timer.id} />;
+
+    //         case 'xy':
+    //             return <XY {...timerProps} key={timer.id} rounds={timer.config?.rounds || 0} timePerRound={timer.config?.timePerRound || 0} currentRound={currentProgress?.currentRound} />;
+
+    //         case 'tabata':
+    //             return (
+    //                 <Tabata
+    //                     {...timerProps}
+    //                     key={timer.id}
+    //                     rounds={timer.config?.rounds || 0}
+    //                     workTime={timer.config?.workTime || 0}
+    //                     restTime={timer.config?.restTime || 0}
+    //                     currentRound={currentProgress?.currentRound}
+    //                     isWorkPhase={currentProgress?.isWorkPhase}
+    //                 />
+    //             );
+
+    //         default:
+    //             return null;
+    //     }
+    // };
     const renderActiveTimer = () => {
         if (activeTimerIndex === null || !state.timers[activeTimerIndex]) return null;
-
+     
         const timer = state.timers[activeTimerIndex];
         const currentProgress = state.currentProgress;
-
-        const timerProps = {
-            onComplete: handleTimerComplete,
+     
+        const commonProps = {
             isRunning: isWorkoutRunning,
             remainingTime: currentProgress?.remainingTime,
             description: timer.description,
+            onComplete: () => {
+                if (activeTimerIndex < state.timers.length - 1) {
+                    fastForward();
+                }
+            }
         };
-
+     
         switch (timer.type) {
             case 'countdown':
-                return <Countdown {...timerProps} key={timer.id} initialTime={timer.duration} />;
-
+                return <Countdown {...commonProps} key={timer.id} initialTime={timer.duration} />;
+     
             case 'stopwatch':
-                return <Stopwatch {...timerProps} key={timer.id} />;
-
+                return <Stopwatch {...commonProps} key={timer.id} />;
+     
             case 'xy':
-                return <XY {...timerProps} key={timer.id} rounds={timer.config?.rounds || 0} timePerRound={timer.config?.timePerRound || 0} currentRound={currentProgress?.currentRound} />;
-
+                return (
+                    <XY
+                        {...commonProps}
+                        key={timer.id} 
+                        rounds={timer.config?.rounds || 0}
+                        timePerRound={timer.config?.timePerRound || 0}
+                        currentRound={currentProgress?.currentRound}
+                    />
+                );
+     
             case 'tabata':
                 return (
                     <Tabata
-                        {...timerProps}
+                        {...commonProps}
                         key={timer.id}
                         rounds={timer.config?.rounds || 0}
                         workTime={timer.config?.workTime || 0}
@@ -171,11 +232,11 @@ const AddTimerHomeView: React.FC = () => {
                         isWorkPhase={currentProgress?.isWorkPhase}
                     />
                 );
-
+     
             default:
                 return null;
         }
-    };
+     };
 
     return (
         <Container>

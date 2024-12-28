@@ -58,7 +58,7 @@ const PageIndex = () => {
     return (
         <AppContainer>
             <Header>
-                <HeaderTitle>Assignment 2</HeaderTitle>
+                <HeaderTitle>Assignment 3</HeaderTitle>
                 <Nav>
                     <NavItem>
                         <Link to="/">Timers</Link>
